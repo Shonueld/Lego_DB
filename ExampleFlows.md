@@ -20,7 +20,7 @@ Maya wants to see how far she’s gotten through her Lego wishlist and what’s 
 2. Curious about one of the remaining sets, she calls GET /sets/83726 to check the set’s details and decide whether to start it next.
 3. Realizing that she already purchased this set last week, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
 
-## Example Flow 4 – Tracking Friends Progress
+## Example Flow 4 – Getting Inspiration From Friends
 Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
 
 1. He starts by calling GET /users/jim012/friends/activity to view what sets Pam has recently built, wishlisted, or reviewed.
