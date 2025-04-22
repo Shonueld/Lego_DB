@@ -19,3 +19,10 @@ Maya wants to see how far she’s gotten through her Lego wishlist and what’s 
 1. She begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets.
 2. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
 3. Realizing that she recently bought one of the remaining sets, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
+
+## Example Flow 4 – Tracking Friends Progress
+Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
+
+1. he begins by calling GET /users/Jim012/friends/pam012 to view her overall progress across all sets.
+2. Jim receives Pam's whishlist, in-progress, and built lego sets alongside her reviews and ratings if available.
+3. After looking through the options Jim decides to add one of these sets to his wishlist so he calls POST /users/jim012/wishlist/set/1819
