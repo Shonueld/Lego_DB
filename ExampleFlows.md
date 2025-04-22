@@ -16,13 +16,13 @@ Alex just finished building the massive Millennium Falcon set and wants to docum
 ## Example Flow 3 – Tracking Wishlist Completion
 Maya wants to see how far she’s gotten through her Lego wishlist and what’s left to buy and build.
 
-1. She begins by calling GET /users/maya789/list/progress to view her overall progress across all sets.
-2. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
-3. Realizing that she recently bought one of the remaining sets, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
+1. Maya begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
+2. Curious about one of the remaining sets, she calls GET /sets/83726 to check the set’s details and decide whether to start it next.
+3. Realizing that she already purchased this set last week, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
 
 ## Example Flow 4 – Tracking Friends Progress
 Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
 
-1. he begins by calling GET /users/Jim012/friends/pam012 to view her overall progress across all sets.
-2. Jim receives Pam's whishlist, in-progress, and built lego sets alongside her reviews and ratings if available.
-3. After looking through the options Jim decides to add one of these sets to his wishlist so he calls POST /users/jim012/list/set/1819
+1. He starts by calling GET /users/jim012/friends/activity to view what sets Pam has recently built, wishlisted, or reviewed.
+2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
+3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
