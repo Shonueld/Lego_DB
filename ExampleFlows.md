@@ -16,6 +16,6 @@ Alex just finished building the massive Millennium Falcon set and wants to docum
 ## Example Flow 3 – Tracking Wishlist Completion
 Maya wants to see how far she’s gotten through her Lego wishlist and what’s left to buy and build.
 
-She begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets.
-The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
-Realizing that she recently bought one of the remaining sets, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
+1. She begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets.
+2. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
+3. Realizing that she recently bought one of the remaining sets, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
