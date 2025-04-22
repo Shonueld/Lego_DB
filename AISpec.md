@@ -37,7 +37,7 @@ Response:
   "theme": "Star Wars",
   "price": 159.99,
   "pieces": 1351,
-  "release_date": "207-06-15",
+  "release_date": "2007-06-15",
   "avg_rating": 4.7,
   "known_issues": [
     "Missing piece long white brick 4x2",
@@ -47,14 +47,13 @@ Response:
 
 ## 3. Mark Set Status /users/{user_id}/sets/{set_id} (PUT)
 Updates the users status for a specific Lego set
+(status could be wishlist, purchased, building, or built)
 
 Request:
 
 {
   "status": "wishlist" 
 }
-
-(status could be wishlist, purchased, building, or built)
 
 Response:
 
@@ -109,6 +108,7 @@ Response:
 { "success": true }
 
 ## 7. View Friends Build Activity /users/{user_id}/friends/activity (GET)
+View a list of all your friends builds and statuses
 
 Response:
 
@@ -122,15 +122,29 @@ Response:
   ...
 ]
 
-## 8. Get Wishlist Progress /users/{user_id}/wishlist/progress (GET)
-Returns the user's wishlist progress across all sets, showing how many sets they've wishlisted, purchased, are building, or have built.
+## 8. Get List Progress /users/{user_id}/list/progress (GET)
+Returns the user's list progress across all sets, showing how many sets they've wishlisted, purchased, are building, or have built.
 
 Response:
 
 {
-  "total_wishlisted": 12,
+  "total_listed": 12,
   "purchased": 5,
   "building": 3,
   "built": 2,
   "remaining": 2
 }
+
+## 9. Report Review /reviews/{review_id}/report (POST)
+Add a report to someone elses review
+
+Request:
+
+{ "reason": "Offensive language" }
+
+## 10. Add a Friend /users/{user_id}/friends (POST)
+Adds a friend on the database
+
+Request:
+
+{ "friend_id": "user456" }
