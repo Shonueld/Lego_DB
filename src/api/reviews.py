@@ -21,7 +21,7 @@ def add_review(set_id: int, user_id: int, rating: int, description: str):
             sqlalchemy.text(
                 """
                 INSERT INTO reviews (set_id, user_id rating, description)
-                VALUES (:set_id,, :user_id, :rating, :description)
+                VALUES (:set_id, :user_id, :rating, :description)
                 """
             ),
             {"set_id": set_id, "user_id": user_id, "rating": rating, "description": description}
