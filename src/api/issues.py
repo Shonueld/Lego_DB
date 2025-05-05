@@ -30,8 +30,8 @@ def post_deliver_bottles(message: str, set_id: int, user_id: int):
            VALUES (:set_id, :user_id, :message)
            """
        ),
-           {"set_id": set_id},
-           {"user_id", user_id},
-           {"message", message}
+           {"set_id": set_id,
+           "user_id": user_id,
+           "message": message}
        )
 

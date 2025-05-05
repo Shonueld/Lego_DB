@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.api import lists, users, reviews
+from src.api import lists, users, reviews, issues
 from starlette.middleware.cors import CORSMiddleware
 
 description = """
@@ -47,7 +47,7 @@ app.add_middleware(
 app.include_router(lists.router)
 app.include_router(users.router)
 app.include_router(reviews.router)
-
+app.include_router(issues.router)
 
 @app.get("/")
 async def root():
