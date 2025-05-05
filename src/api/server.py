@@ -51,4 +51,4 @@ app.include_router(issues.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Shop is open for business!"}
+    return {"message": "Welcome to LegoDB"}

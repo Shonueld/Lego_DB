@@ -1,13 +1,12 @@
 from dataclasses import dataclass
-from fastapi import APIRouter, Depends, status
-from pydantic import BaseModel, Field, field_validator
+from fastapi import APIRouter, Depends, status, HTTPException
+from pydantic import BaseModel, Field
 from typing import List
+from datetime import datetime
 
 import sqlalchemy
 from src.api import auth
 from src import database as db
-import random
-from datetime import datetime
 
 router = APIRouter(
     prefix="",
@@ -22,26 +21,52 @@ class IssueResponse(BaseModel):
     description: str
     created_at: datetime  
 
-@router.post("/sets/{set_id}/issues", status_code=status.HTTP_204_NO_CONTENT)
-def post_deliver_bottles(message: str, set_id: int, user_id: int):
-   """
-   Delivery of potions requested after plan. order_id is a unique value representing
-   a single delivery; the call is idempotent based on the order_id.
-   """
-   print(f"(POST set issuse) message: {message} order_id: {set_id} user_id: {user_id}")
+class IssueRequest(BaseModel):
+    user_id: int
+    message: str
 
+@router.post("/sets/{set_id}/issues", status_code=status.HTTP_201_CREATED)
+def post_issue(set_id: int, issue: IssueRequest):
+    """
+    Adds an issue for a specific Lego set.
+    """
+    with db.engine.begin() as connection:
+        # Lookup username for user_id
+        user_row = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
+            {"user_id": issue.user_id}
+        ).fetchone()
 
-   with db.engine.begin() as connection:
-       connection.execute(sqlalchemy.text(
-           """
-           INSERT INTO issues (set_id, user_id, description)
-           VALUES (:set_id, :user_id, :message)
-           """
-       ),
-           {"set_id": set_id,
-           "user_id": user_id,
-           "message": message}
-       )
+        if not user_row:
+            raise HTTPException(status_code=404, detail="User not found.")
+
+        # Insert issue and return new row info
+        result = connection.execute(
+            sqlalchemy.text(
+                """
+                INSERT INTO issues (set_id, user_id, description)
+                VALUES (:set_id, :user_id, :message)
+                RETURNING issue_id, created_at
+                """
+            ),
+            {
+                "set_id": set_id,
+                "user_id": issue.user_id,
+                "message": issue.message
+            }
+        ).fetchone()
+
+    return {
+        "message": "Issue successfully reported.",
+        "data": {
+            "issue_id": result.issue_id,
+            "set_id": set_id,
+            "user_id": issue.user_id,
+            "username": user_row.username,
+            "description": issue.message,
+            "created_at": result.created_at
+        }
+    }
 
 @router.get("/sets/{set_id}/issues", response_model=List[IssueResponse])
 def get_issues_for_set(set_id: int):
@@ -64,4 +89,3 @@ def get_issues_for_set(set_id: int):
         issues = result.fetchall()
 
     return [dict(row._mapping) for row in issues]
-

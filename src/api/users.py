@@ -18,7 +18,7 @@ class NewUser(BaseModel):
     username: str = Field(..., min_length=1)
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(new_user: NewUser):
     with db.engine.begin() as connection:
     

@@ -15,7 +15,7 @@ class ListStatusUpdate(BaseModel):
 
 VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
 
-@router.put("/{username}/sets/{set_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/{username}/sets/{set_id}", status_code=status.HTTP_200_OK)
 def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
     """
     Updates or inserts a user's status for a specific LEGO set.
@@ -57,6 +57,7 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
                 """),
                 {"status": body.status, "list_id": existing.list_id}
             )
+            action = "updated"
         else:
             # Insert new list entry
             conn.execute(
@@ -66,3 +67,10 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
                 """),
                 {"user_id": user_id, "set_id": set_id, "status": body.status}
             )
+            action = "created"
+    return {
+        "message": f"List entry for set {set_id} has been {action} with status '{body.status}'",
+        "username": username,
+        "set_id": set_id,
+        "status": body.status
+    }
