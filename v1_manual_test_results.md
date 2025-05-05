@@ -1,17 +1,9 @@
-# Example workflow
-A user can create an account and then view their profile.
+# Example Flow 2 – Builder Reviews a Completed Set
+ 
+Alex just finished building the massive Millennium Falcon set and wants to document his experience and help other builders.
 
-# Testing results
+He starts by calling PUT /users/alex456/sets/12345 to mark the set as "built."
 
-1. **Create a user**
-**Curl:**
-curl -X POST \
-  https://mycoolapp.onrender.com/users/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "testuser", "email": "test@example.com"}'
+Then, he calls POST /sets/12345/reviews to leave a 5-star review with a comment about how detailed and enjoyable the build was.
+Noticing that a brick was missing from one of the bags, he also calls POST /sets/12345/issues to report a known issue about the missing piece in bag 3.
 
-**Response:**
-{
-  "username": "testuser",
-  "id": 1
-}
