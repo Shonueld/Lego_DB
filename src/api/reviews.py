@@ -4,11 +4,11 @@ from src import database as db
 import sqlalchemy
 
 router = APIRouter(
-    prefix="/sets/{set_id}/reviews",
-    tags=["sets", "reviews"]
+    prefix="/sets",
+    tags=["sets"]
 )
 
-@router.post("/")
+@router.post("/{set_id}/reviews")
 def add_review(set_id: int, user_id: int, rating: int, description: str):
     """
     Add a review for a specific Lego set.
