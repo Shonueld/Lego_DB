@@ -1,8 +1,8 @@
 ## Example Flow 1 – Parent Searching for a Gift
 Sarah is shopping for a Lego set for her 10-year-old son’s birthday. She wants something age-appropriate, under $60, and not too complex.
 
-1. Sarah starts by calling GET /sets with filters for age under 13, price under $60, and piece count under 500 to find suitable gift options.
-2. She finds a "Lego City Fire Truck" and calls GET /sets/91234 to view more details about the set.
+1. Sarah starts by calling GET /sets with filters for age piece count under 500, with Mario theme, that came out after 2018 and piece count under 500 to find suitable gift options.
+2. She finds a set and calls GET /sets/91234 to view more details about the set.
 3. Satisfied with the difficulty and reviews, she calls PUT /users/sarah123/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
 4. Later, she purchases it and updates her status by calling PUT /users/sarah123/sets/91234 again, this time marking the status as "purchased."
 
