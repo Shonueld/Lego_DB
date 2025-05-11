@@ -74,3 +74,49 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
         "set_id": set_id,
         "status": body.status
     }
+
+# Example Flow 3 - Function 1
+@router.put("/{username}/progress", status_code=status.HTTP_200_OK)
+def get_list_progress(username: str):
+    """
+    Displays a user's progress for their entire list.
+    """
+
+    with db.engine.begin() as conn:
+        # 1. Get the user_id from the username
+        user = conn.execute(
+            sqlalchemy.text(
+                """
+                SELECT user_id
+                FROM users
+                WHERE username = :username
+                """
+            ),
+            {"username": username}
+        ).fetchone()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found.")
+
+        user_id = user.user_id
+
+        # 2. Count and return the number of each status in user's list
+        progress = {}
+
+        for status in VALID_STATUSES:
+            count = conn.execute(
+            sqlalchemy.text(
+                """
+                SELECT COUNT(*) AS status_count
+                FROM lists
+                WHERE user_id = :user_id AND status = :status
+                """
+            ),
+            {"user_id": user_id, "status": status}
+            ).scalar()
+            progress[status] = count
+
+    return {
+        "message": f"Displayed progress for user {username}'",
+        "progress": progress
+    }
