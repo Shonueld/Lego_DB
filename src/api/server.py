@@ -3,32 +3,31 @@ from src.api import lists, users, reviews, issues, search
 from starlette.middleware.cors import CORSMiddleware
 
 description = """
-Central Coast Cauldrons is the premier ecommerce site for all your alchemical desires.
+LEGO DB is a database of (almost) every lego set. Add friends, create your list, and build!.
 """
 tags_metadata = [
-    {"name": "cart", "description": "Place potion orders."},
-    {"name": "catalog", "description": "View the available potions."},
-    {"name": "bottler", "description": "Bottle potions from the raw magical elixir."},
-    {
-        "name": "barrels",
-        "description": "Buy barrels of raw magical elixir for making potions.",
-    },
-    {"name": "admin", "description": "Where you reset the game state."},
-    {"name": "info", "description": "Get updates on time"},
-    {
-        "name": "inventory",
-        "description": "Get the current inventory of shop and buying capacity.",
-    },
+    #{"name": "cart", "description": "Place potion orders."},
+    #{"name": "catalog", "description": "View the available potions."},
+    #{"name": "bottler", "description": "Bottle potions from the raw magical elixir."},
+    #{
+    #    "name": "barrels",
+    #    "description": "Buy barrels of raw magical elixir for making potions.",
+    #},
+    #{"name": "admin", "description": "Where you reset the game state."},
+    #{"name": "info", "description": "Get updates on time"},
+    #{
+    #    "name": "inventory",
+    #    "description": "Get the current inventory of shop and buying capacity.",
+    #},
 ]
 
 app = FastAPI(
-    title="Central Coast Cauldrons",
+    title="Lego DB",
     description=description,
     version="0.0.1",
     terms_of_service="http://example.com/terms/",
     contact={
-        "name": "Lucas Pierce",
-        "email": "lupierce@calpoly.edu",
+        "name": "Sean Griffin, Yenny Ma, Thomas Hagos, Javier Medina"
     },
     openapi_tags=tags_metadata,
 )
