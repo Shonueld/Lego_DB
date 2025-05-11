@@ -76,7 +76,7 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
     }
 
 # Example Flow 3 - Function 1
-@router.put("/{username}/progress", status_code=status.HTTP_200_OK)
+@router.get("/{username}/progress", status_code=status.HTTP_200_OK)
 def get_list_progress(username: str):
     """
     Displays a user's progress for their entire list.
@@ -117,6 +117,6 @@ def get_list_progress(username: str):
             progress[status] = count
 
     return {
-        "message": f"Displayed progress for user {username}'",
+        "message": f"Displayed progress for user {username}",
         "progress": progress
     }
