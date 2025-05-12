@@ -138,7 +138,7 @@ def get_friends(user_id: int, friend_id:int ):
     if result.rowcount < 1:
         return{"Not Friends"}
 
-    activity = [{"set_id": row.set_id, "status": row.status, "at_time": row.created_at} for row in result]
+    friends = [{"set id": row.id, "set name": row.name, "status": row.status, "created at": row.created_at} for row in result]
 
     return {"friend username": friend_username, "activity": activity}
 
