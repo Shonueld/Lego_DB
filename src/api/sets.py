@@ -23,7 +23,7 @@ class Set(BaseModel):
     theme_name: str
 
 
-@router.get("/{set_id}}", status_code=status.HTTP_200_OK)
+@router.get("/{set_id}", status_code=status.HTTP_200_OK)
 def get_set(set_id: int):
     """
     Retrieves details for a specific set by ID
@@ -42,8 +42,8 @@ def get_set(set_id: int):
         if not result:
             raise HTTPException(status_code=404, detail="Set not found")
         
-        set_details = dict(result)
+        set_details = dict(result._mapping)
 
-    return {"message": f"Displays details for set {set.id}",
+    return {"message": f"Displays details for set {set_id}",
             "set_details": set_details 
     }
