@@ -100,21 +100,26 @@ def get_list_progress(user_id: int):
 
         username = user.username
 
-        # 2. Count and return the number of each status in user's list
-        progress = {}
-
-        for status in VALID_STATUSES:
-            count = conn.execute(
+        # 2. Get sets grouped by status
+        result = conn.execute(
             sqlalchemy.text(
                 """
-                SELECT COUNT(*) AS status_count
-                FROM lists
-                WHERE user_id = :user_id AND status = :status
+                SELECT l.status, s.name AS set_name
+                FROM lists l
+                JOIN sets s ON l.set_id = s.id
+                WHERE l.user_id = :user_id
+                ORDER BY l.status, s.name
                 """
             ),
-            {"user_id": user_id, "status": status}
-            ).scalar()
-            progress[status] = count
+            {"user_id": user_id}
+        ).fetchall()
+
+    # 3. Organize results into a dictionary
+    progress = {status: {"count": 0, "sets": []} for status in VALID_STATUSES}
+    for row in result:
+        if row.status in progress:
+            progress[row.status]["count"] += 1
+            progress[row.status]["sets"].append(row.set_name)
 
     return {
         "message": f"Displayed progress for user {username}",
