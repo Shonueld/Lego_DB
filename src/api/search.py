@@ -16,7 +16,8 @@ def search_sets(
     max_pieces: Optional[int] = Query(None, description="Maximum number of pieces"),
     min_year: Optional[int] = Query(None, description="Minimum year of release"),
     max_year: Optional[int] = Query(None, description="Maximum year of release"),
-    theme: Optional[str] = Query(None, description="Theme name to filter by")
+    theme: Optional[str] = Query(None, description="Theme name to filter by"),
+    name: Optional[str] = Query(None, description="Name of the set to search for"),
 ):
     """
     Search for LEGO sets using optional filters like piece count, year, and theme.
@@ -47,6 +48,10 @@ def search_sets(
     if theme is not None:
         query += " AND theme_name ILIKE :theme"
         params["theme"] = f"%{theme}%"
+
+    if name is not None:
+        query += " AND name ILIKE :name"
+        params["name"] = f"%{name}%"
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(query), params)
