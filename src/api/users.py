@@ -108,12 +108,16 @@ def get_friends(user_id: int):
 @router.get("/{user_id}/friends/{friends_id}/activity", status_code=status.HTTP_201_CREATED)
 def get_friends(user_id: int, friend_id:int ):
     with db.engine.begin() as connection:
+
+
+
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT l.set_id, l.status, l.created_at
+                SELECT s.id, s.name,l.status, l.created_at
                 FROM lists l
                 JOIN friends f ON f.friend_id = l.user_id
+                JOIN sets s ON s.id = l.set_id
                 WHERE 
                     f.user_id = :user_id AND 
                     f.friend_id = :friend_id
@@ -131,8 +135,10 @@ def get_friends(user_id: int, friend_id:int ):
                 WHERE user_id = :friend_id
                 """), {"friend_id": friend_id}).scalar_one_or_none()
 
+    if result.rowcount < 1:
+        return{"Not Friends"}
 
-    friends = [{"set_id": row.set_id, "status": row.status, "created_at": row.created_at} for row in result]
+    friends = [{"set id": row.id, "set name": row.name, "status": row.status, "created at": row.created_at} for row in result]
 
     return {"friend username": friend_username, "friends": friends}
 
