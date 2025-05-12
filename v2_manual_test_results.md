@@ -169,7 +169,7 @@ curl -X 'GET' \
 # RESPONSE:
 {
   "friend username": "Pam12345",
-  "friends": [
+  "activity": [
     {
       "set id": 1819,
       "set name": "Gamma V Laser Craft",
