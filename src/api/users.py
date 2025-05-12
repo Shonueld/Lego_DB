@@ -114,18 +114,34 @@ def get_friends(user_id: int, friend_id:int ):
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT s.id, s.name,l.status, l.created_at
+                SELECT s.id, s.name, l.status, l.created_at, r.rating, r.description
                 FROM lists l
                 JOIN friends f ON f.friend_id = l.user_id
                 JOIN sets s ON s.id = l.set_id
+                LEFT JOIN reviews r ON r.user_id = l.user_id AND r.set_id = s.id
                 WHERE 
                     f.user_id = :user_id AND 
                     f.friend_id = :friend_id
                 ORDER BY l.created_at DESC
+                LIMIT 5
+                """),
+            {"user_id": user_id,"friend_id": friend_id},)
+        
+        resultReviews = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT s.id, s.name, r.rating, r.description, r.created_at
+                FROM reviews r
+                JOIN friends f ON f.friend_id = r.user_id
+                JOIN sets s ON s.id = r.set_id
+                WHERE 
+                    f.user_id = :user_id AND 
+                    f.friend_id = :friend_id
+                ORDER BY r.created_at DESC
+                LIMIT 5
                 
                 """),
-            {"user_id": user_id,"friend_id": friend_id},
-        )
+            {"user_id": user_id,"friend_id": friend_id},)
 
         friend_username = connection.execute(
             sqlalchemy.text(
@@ -138,7 +154,32 @@ def get_friends(user_id: int, friend_id:int ):
     if result.rowcount < 1:
         return{"Not Friends"}
 
-    friends = [{"set id": row.id, "set name": row.name, "status": row.status, "created at": row.created_at} for row in result]
+    activity = []
+    reviews = []
 
-    return {"friend username": friend_username, "activity": activity}
+    for row in result:
+        entry = {
+            "set id": row.id,
+            "set name": row.name,
+            "status": row.status,
+            "created at": row.created_at
+        }
+
+        activity.append(entry)
+
+    for row in resultReviews:
+        entry = {
+            "set id": row.id,
+            "set name": row.name,
+            "created at": row.created_at
+        }
+
+        if row.rating is not None:
+            review_entry = entry.copy()
+            review_entry["rating"] = row.rating
+            review_entry["description"] = row.description
+            reviews.append(review_entry)
+            
+
+    return {"friend username": friend_username, "activity": activity, "reviews": reviews} 
 
