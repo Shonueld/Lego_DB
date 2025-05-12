@@ -15,8 +15,8 @@ class ListStatusUpdate(BaseModel):
 
 VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
 
-@router.put("/{username}/sets/{set_id}", status_code=status.HTTP_200_OK)
-def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
+@router.put("/{user_id}/sets/{set_id}", status_code=status.HTTP_200_OK)
+def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     """
     Updates or inserts a user's status for a specific LEGO set.
     """
@@ -25,18 +25,18 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
         raise HTTPException(status_code=400, detail="Invalid status.")
 
     with db.engine.begin() as conn:
-        # 1. Get the user_id from the username
+        # 1. Get the username
         user = conn.execute(
             sqlalchemy.text("""
-                SELECT user_id FROM users WHERE username = :username
+                SELECT username FROM users WHERE user_id = :user_id
             """),
-            {"username": username}
+            {"user_id": user_id}
         ).fetchone()
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
 
-        user_id = user.user_id
+        username = user.username
 
         # 2. Check if the list entry already exists
         existing = conn.execute(
@@ -76,29 +76,29 @@ def update_list_status(username: str, set_id: int, body: ListStatusUpdate):
     }
 
 # Example Flow 3 - Function 1
-@router.get("/{username}/progress", status_code=status.HTTP_200_OK)
-def get_list_progress(username: str):
+@router.get("/{user_id}/progress", status_code=status.HTTP_200_OK)
+def get_list_progress(user_id: int):
     """
     Displays a user's progress for their entire list.
     """
 
     with db.engine.begin() as conn:
-        # 1. Get the user_id from the username
+        # 1. Get the username from the user_id
         user = conn.execute(
             sqlalchemy.text(
                 """
-                SELECT user_id
+                SELECT username
                 FROM users
-                WHERE username = :username
+                WHERE user_id = :user_id
                 """
             ),
-            {"username": username}
+            {"user_id": user_id}
         ).fetchone()
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found.")
 
-        user_id = user.user_id
+        username = user.username
 
         # 2. Count and return the number of each status in user's list
         progress = {}
