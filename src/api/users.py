@@ -32,7 +32,7 @@ def create_user(new_user: NewUser):
             {"username": new_user.username},
         ).scalar_one()
 
-        if result > 1:
+        if result > 0:
             raise HTTPException(status_code=400, detail="Username already exists")
 
         connection.execute(
