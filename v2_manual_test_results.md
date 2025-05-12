@@ -3,48 +3,65 @@ Sarah is shopping for a Lego set for her 10-year-old son’s birthday. She wants
 
 1. (Assuming Sarah already has an account) Sarah starts by calling GET /sets with filters for age piece count under 500, with Mario theme, that came out after 2018 and piece count under 500 to find suitable gift options.
 2. She finds a set and calls GET /sets/91234 to view more details about the set.
-3. Satisfied with the difficulty and reviews, she calls PUT /users/sarah123/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
-4. Later, she purchases it and updates her status by calling PUT /users/sarah123/sets/91234 again, this time marking the status as "purchased."
+3. Satisfied with the difficulty and reviews, she calls PUT /users/Sarah/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
+4. Later, she purchases it and updates her status by calling PUT /users/Sarah/sets/91234 again, this time marking the status as "purchased."
  
 # CURL #1:
 curl -X 'GET' \
-  'http://127.0.0.1:3000/sets/?min_pieces=1&max_pieces=500&min_year=1900&max_year=2020&theme=System&name=Medium%20Gift%20Set%20%28ABB%29' \
+  'http://127.0.0.1:3000/sets/?max_pieces=500&min_year=2018&theme=Mario' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 # Response #1:
 [
   {
-    "id": 4,
-    "set_number": "700.3-1",
-    "name": "Medium Gift Set (ABB)",
-    "year_released": 1949,
-    "number_of_parts": 142,
-    "theme_name": "System"
-  }
+    "id": 17673,
+    "set_number": "5006216-1",
+    "name": "Starter Kit Bundle with Gift",
+    "year_released": 2020,
+    "number_of_parts": 0,
+    "theme_name": "Super Mario"
+  },
+  {
+    "id": 17674,
+    "set_number": "6288911-1",
+    "name": "Character Pack Series 1 - Sealed Box",
+    "year_released": 2020,
+    "number_of_parts": 0,
+    "theme_name": "Super Mario"
+  },
+  {
+    "id": 17675,
+    "set_number": "71361-0",
+    "name": "Character Pack Series 1 - Random Bag",
+    "year_released": 2020,
+    "number_of_parts": 0,
+    "theme_name": "Super Mario"
+  },
+  ... (Many more sets)
 ]
 
  
 # CURL #2:
 curl -X 'GET' \
-  'http://127.0.0.1:3000/sets/788' \
+  'http://127.0.0.1:3000/sets/19131' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 # Response #2:
 {
-  "message": "Displays details for set 788",
+  "message": "Displays details for set 19131",
   "set_details": {
-    "id": 788,
-    "set_number": "115-1",
-    "name": "Building Set",
-    "year_released": 1973,
-    "number_of_parts": 190,
-    "theme_name": "Basic Set"
+    "id": 19131,
+    "set_number": "71384-1",
+    "name": "Penguin Mario Power-Up Pack",
+    "year_released": 2021,
+    "number_of_parts": 18,
+    "theme_name": "Super Mario"
   }
 }
 
 # CURL #3:
 curl -X 'PUT' \
-  'http://127.0.0.1:3000/lists/2/sets/788' \
+  'http://127.0.0.1:3000/lists/7/sets/19131' \
   -H 'accept: application/json' \
   -H 'access_token: brat' \
   -H 'Content-Type: application/json' \
@@ -53,15 +70,15 @@ curl -X 'PUT' \
 }'
 # Response #3:
 {
-  "message": "List entry for set 788 has been created with status 'wishlist'",
-  "username": "bobby",
-  "set_id": 788,
+  "message": "List entry for set 19131 has been created with status 'wishlist'",
+  "username": "Sarah",
+  "set_id": 19131,
   "status": "wishlist"
 }
  
 # CURL #4:
 curl -X 'PUT' \
-  'http://127.0.0.1:3000/lists/sarah123/sets/1' \
+  'http://127.0.0.1:3000/lists/7/sets/19131' \
   -H 'accept: application/json' \
   -H 'access_token: brat' \
   -H 'Content-Type: application/json' \
@@ -70,44 +87,57 @@ curl -X 'PUT' \
 }'
 # Response #4:
 {
-  "message": "List entry for set 1 has been updated with status 'purchased'",
-  "username": "sarah123",
-  "set_id": 1,
+  "message": "List entry for set 19131 has been updated with status 'purchased'",
+  "username": "Sarah",
+  "set_id": 19131,
   "status": "purchased"
 }
 
 ## Example Flow 3 – Tracking Wishlist Completion
-Maya wants to see how far she’s gotten through her Lego wishlist and what’s left to buy and build.
+Maya wants to see how far she’s gotten through her Lego list and what’s left to buy and build.
 
-1. Maya begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
-2. Curious about one of the remaining sets, she calls GET /sets/83726 to check the set’s details and decide whether to start it next.
-3. Realizing that she already purchased this set last week, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
+1. (Assuming Maya already has an account and items in her list) Maya begins by calling GET /users/Maya/list/progress to view her overall progress across all sets. The database tells her she’s wishlisted 4 sets, purchased 3, is building 1, and has built 1.
+2. Curious about one of the remaining sets, she calls GET /sets/19145 to check the set’s details and decide whether to start it next.
+3. Realizing that she already built this set last week, she updates her status by calling PUT /users/Maya/sets/19145 to mark it as "built."
 
  
 # CURL #1:
 curl -X 'GET' \
-  'http://127.0.0.1:3000/lists/2/progress' \
+  'http://127.0.0.1:3000/lists/8/progress' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 # Response #1:
 {
-  "message": "Displayed progress for user bobby",
+  "message": "Displayed progress for user Maya",
   "progress": {
-    "building": {
-      "count": 0,
-      "sets": []
-    },
     "built": {
-      "count": 0,
-      "sets": []
-    },
-    "purchased": {
-      "count": 0,
-      "sets": []
+      "count": 1,
+      "sets": [
+        "Firefighter Bob with Equipment"
+      ]
     },
     "wishlist": {
-      "count": 0,
-      "sets": []
+      "count": 4,
+      "sets": [
+        "Friends: Piżama Party",
+        "Parachute Goomba",
+        "Thwimp",
+        "Torpedo Ted"
+      ]
+    },
+    "purchased": {
+      "count": 3,
+      "sets": [
+        "Builder with Epic Digger",
+        "Garbage Truck and Recycling",
+        "Performing Dog"
+      ]
+    },
+    "building": {
+      "count": 1,
+      "sets": [
+        "TIE Bomber"
+      ]
     }
   }
 }
@@ -115,51 +145,50 @@ curl -X 'GET' \
  
 # CURL #2:
 curl -X 'GET' \
-  'http://127.0.0.1:3000/sets/50' \
+  'http://127.0.0.1:3000/sets/19145' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 # Response #2:
 {
-  "message": "Displays details for set 50",
+  "message": "Displays details for set 19145",
   "set_details": {
-    "id": 50,
-    "set_number": "1240-2",
-    "name": "8 Road Signs",
-    "year_released": 1955,
-    "number_of_parts": 8,
-    "theme_name": "Supplemental"
+    "id": 19145,
+    "set_number": "952102-1",
+    "name": "Builder with Epic Digger",
+    "year_released": 2021,
+    "number_of_parts": 21,
+    "theme_name": "Construction"
   }
 }
  
 # CURL #3:
 curl -X 'PUT' \
-  'http://127.0.0.1:3000/lists/maya789/sets/1' \
+  'http://127.0.0.1:3000/lists/8/sets/19145' \
   -H 'accept: application/json' \
   -H 'access_token: brat' \
   -H 'Content-Type: application/json' \
   -d '{
-        "status": "purchased"
-      }'
+  "status": "built"
+}'
 
 # Response #3:
 {
-  "message": "List entry for set 1 has been created with status 'purchased'",
-  "username": "maya789",
-  "set_id": 1,
-  "status": "purchased"
+  "message": "List entry for set 19145 has been updated with status 'built'",
+  "username": "Maya",
+  "set_id": 19145,
+  "status": "built"
 }
-
 ## Example Flow 4 – Getting Inspiration From Friends
 Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
 
-1. He starts by calling GET /users/jim012/friends/activity to view what sets Pam has recently built, wishlisted, or reviewed.
+1. (Assuming Him already has an account with Pam, who is also active) He starts by calling GET /users/9/friends/10/activity to view what sets Pam has recently built, wishlisted, or reviewed.
 2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
 3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
 
  
 # CURL #1: 
 curl -X 'GET' \
-  'http://127.0.0.1:3000/users/7/friends/8/activity' \
+  'http://127.0.0.1:3000/users/9/friends/10/activity' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 
