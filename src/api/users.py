@@ -79,15 +79,6 @@ def add_friends(user_id: int, friend:Friend):
 @router.get("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
 def get_friends(user_id: int):
     with db.engine.begin() as connection:
-        result = connection.execute(
-            sqlalchemy.text(
-                """
-                SELECT username
-                FROM users u
-                JOIN friends f ON f.friend_id = u.user_id
-
-                """),
-            {"user_id": user_id,},)
         username = connection.execute(
             sqlalchemy.text(
                 """
@@ -96,7 +87,18 @@ def get_friends(user_id: int):
                 where user_id = :user_id
                 """
             ), {"user_id": user_id}).scalar_one_or_none()
-    friends = [{"friend_id" : row.username for row in result}]
+        
+        result = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT u.username
+                FROM users u
+                JOIN friends f ON f.friend_id = u.user_id
+                WHERE f.user_id = :user_id
+                """),
+            {"user_id": user_id,},).fetchall()
+        
+        friends = [{"friend_id": row.username} for row in result]
     
 
     if username:
