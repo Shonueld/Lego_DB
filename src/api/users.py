@@ -77,7 +77,7 @@ def add_friends(user_id: int, friend:Friend):
     return {"message": f"User:'{user_id}' added friend {friend.friend_id}"}
 
 @router.get("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
-def get_friends(user_id: int, friend:Friend):
+def get_friends(user_id: int):
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
