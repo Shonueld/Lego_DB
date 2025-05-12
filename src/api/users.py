@@ -130,7 +130,7 @@ def get_friends(user_id: int, friend_id:int ):
                 """), {"friend_id": friend_id}).scalar_one_or_none()
 
 
-    friends = [{"set_id": row.set_id, "status": row.status, "created_at": row.created_at} for row in result]
+    activity = [{"set_id": row.set_id, "status": row.status, "created_at": row.created_at} for row in result]
 
-    return {"friend username": friend_username, "friends": friends}
+    return {"friend username": friend_username, "activity": activity}
 
