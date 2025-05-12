@@ -6,6 +6,61 @@ Sarah is shopping for a Lego set for her 10-year-old son’s birthday. She wants
 3. Satisfied with the difficulty and reviews, she calls PUT /users/sarah123/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
 4. Later, she purchases it and updates her status by calling PUT /users/sarah123/sets/91234 again, this time marking the status as "purchased."
 
+1. 
+# CURL:
+curl -X 'GET' \
+  'http://127.0.0.1:3000/sets/?min_pieces=1&max_pieces=500&min_year=1900&max_year=2020&theme=System&name=Medium%20Gift%20Set%20%28ABB%29' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+# Response:
+[
+  {
+    "id": 4,
+    "set_number": "700.3-1",
+    "name": "Medium Gift Set (ABB)",
+    "year_released": 1949,
+    "number_of_parts": 142,
+    "theme_name": "System"
+  }
+]
+
+2. 
+# CURL:
+curl -X 'GET' \
+  'http://127.0.0.1:3000/sets/788' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+# Response:
+{
+  "message": "Displays details for set 788",
+  "set_details": {
+    "id": 788,
+    "set_number": "115-1",
+    "name": "Building Set",
+    "year_released": 1973,
+    "number_of_parts": 190,
+    "theme_name": "Basic Set"
+  }
+}
+
+3. 
+# CURL:
+curl -X 'PUT' \
+  'http://127.0.0.1:3000/lists/2/sets/788' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "status": "wishlist"
+}'
+# Response:
+{
+  "message": "List entry for set 788 has been created with status 'wishlist'",
+  "username": "bobby",
+  "set_id": 788,
+  "status": "wishlist"
+}
+
 4. 
 # CURL:
 curl -X 'PUT' \
@@ -162,8 +217,6 @@ curl -X 'GET' \
     "theme_name": "Classic Space"
   }
 }
-
-
 
 3. 
 # CURL:
