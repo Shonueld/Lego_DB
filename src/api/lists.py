@@ -18,7 +18,7 @@ VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
 @router.put("/{user_id}/sets/{set_id}", status_code=status.HTTP_200_OK)
 def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     """
-    Updates or inserts a user's status for a specific LEGO set.
+    Updates or inserts a user's status for a specific LEGO set. Valid statuses are: wishlist, building, purchased, built.
     """
 
     if body.status not in VALID_STATUSES:
