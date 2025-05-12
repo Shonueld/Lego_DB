@@ -104,6 +104,67 @@ Jim is new to legos and is unsure what sets to go for next. He decides to check 
 2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
 3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
 
+1. 
+# CURL: 
+curl -X 'GET' \
+  'http://127.0.0.1:3000/users/7/friends/8/activity' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+
+# RESPONSE:
+{
+  "friend username": "Pam12345",
+  "friends": [
+    {
+      "set id": 1819,
+      "set name": "Gamma V Laser Craft",
+      "status": "wishlist",
+      "created at": "2025-05-12T02:22:32.913853+00:00"
+    },
+    {
+      "set id": 900,
+      "set name": "Lear Jet",
+      "status": "built",
+      "created at": "2025-05-12T02:21:40.712335+00:00"
+    },
+    {
+      "set id": 100,
+      "set name": "Sloping Ridge and Valley Bricks, Red",
+      "status": "built",
+      "created at": "2025-05-12T02:21:34.105437+00:00"
+    },
+    {
+      "set id": 91,
+      "set name": "LEGO Town Plan Wooden Board",
+      "status": "wishlist",
+      "created at": "2025-05-12T02:21:05.992547+00:00"
+    }
+  ]
+}
+
+2.
+# CURL
+curl -X 'GET' \
+  'http://127.0.0.1:3000/sets/1819' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+
+
+# RESPONSE: 
+{
+  "message": "Displays details for set 1819",
+  "set_details": {
+    "id": 1819,
+    "set_number": "6891-1",
+    "name": "Gamma V Laser Craft",
+    "year_released": 1985,
+    "number_of_parts": 135,
+    "theme_name": "Classic Space"
+  }
+}
+
+
+
 3. 
 # CURL:
 curl -X 'PUT' \

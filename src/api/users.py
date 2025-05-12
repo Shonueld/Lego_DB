@@ -105,7 +105,7 @@ def get_friends(user_id: int):
         return {"user": username, "friends": friends}
     return{"user not found"}
 
-@router.get("/{user_id}/friends/{friends_id}/activity", status_code=status.HTTP_201_CREATED)
+@router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_201_CREATED)
 def get_friends(user_id: int, friend_id:int ):
     with db.engine.begin() as connection:
 
