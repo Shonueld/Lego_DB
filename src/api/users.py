@@ -79,15 +79,6 @@ def add_friends(user_id: int, friend:Friend):
 @router.get("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
 def get_friends(user_id: int):
     with db.engine.begin() as connection:
-        result = connection.execute(
-            sqlalchemy.text(
-                """
-                SELECT username
-                FROM users u
-                JOIN friends f ON f.friend_id = u.user_id
-
-                """),
-            {"user_id": user_id,},)
         username = connection.execute(
             sqlalchemy.text(
                 """
@@ -96,22 +87,37 @@ def get_friends(user_id: int):
                 where user_id = :user_id
                 """
             ), {"user_id": user_id}).scalar_one_or_none()
-    friends = [{"friend_id" : row.username for row in result}]
+        
+        result = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT u.username
+                FROM users u
+                JOIN friends f ON f.friend_id = u.user_id
+                WHERE f.user_id = :user_id
+                """),
+            {"user_id": user_id,},).fetchall()
+        
+        friends = [{"friend_id": row.username} for row in result]
     
 
     if username:
         return {"user": username, "friends": friends}
     return{"user not found"}
 
-@router.get("/{user_id}/friends/{friends_id}/activity", status_code=status.HTTP_201_CREATED)
+@router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_201_CREATED)
 def get_friends(user_id: int, friend_id:int ):
     with db.engine.begin() as connection:
+
+
+
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT l.set_id, l.status, l.created_at
+                SELECT s.id, s.name,l.status, l.created_at
                 FROM lists l
                 JOIN friends f ON f.friend_id = l.user_id
+                JOIN sets s ON s.id = l.set_id
                 WHERE 
                     f.user_id = :user_id AND 
                     f.friend_id = :friend_id
@@ -129,8 +135,10 @@ def get_friends(user_id: int, friend_id:int ):
                 WHERE user_id = :friend_id
                 """), {"friend_id": friend_id}).scalar_one_or_none()
 
+    if result.rowcount < 1:
+        return{"Not Friends"}
 
-    activity = [{"set_id": row.set_id, "status": row.status, "created_at": row.created_at} for row in result]
+    activity = [{"set_id": row.set_id, "status": row.status, "at_time": row.created_at} for row in result]
 
     return {"friend username": friend_username, "activity": activity}
 

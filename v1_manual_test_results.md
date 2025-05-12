@@ -15,8 +15,8 @@ curl -X 'PUT' \
   -H 'access_token: brat' \
   -H 'Content-Type: application/json' \
   -d '{
-  "status": "built"
-}'
+        "status": "built"
+      }'
 # Response:
 {
   "message": "List entry for set 1 has been created with status 'built'",
