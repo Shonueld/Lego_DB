@@ -5,14 +5,13 @@ Sarah is shopping for a Lego set for her 10-year-old son’s birthday. She wants
 2. She finds a set and calls GET /sets/91234 to view more details about the set.
 3. Satisfied with the difficulty and reviews, she calls PUT /users/sarah123/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
 4. Later, she purchases it and updates her status by calling PUT /users/sarah123/sets/91234 again, this time marking the status as "purchased."
-
-1. 
-# CURL:
+ 
+# CURL #1:
 curl -X 'GET' \
   'http://127.0.0.1:3000/sets/?min_pieces=1&max_pieces=500&min_year=1900&max_year=2020&theme=System&name=Medium%20Gift%20Set%20%28ABB%29' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
-# Response:
+# Response #1:
 [
   {
     "id": 4,
@@ -24,13 +23,13 @@ curl -X 'GET' \
   }
 ]
 
-2. 
-# CURL:
+ 
+# CURL #2:
 curl -X 'GET' \
   'http://127.0.0.1:3000/sets/788' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
-# Response:
+# Response #2:
 {
   "message": "Displays details for set 788",
   "set_details": {
@@ -43,8 +42,7 @@ curl -X 'GET' \
   }
 }
 
-3. 
-# CURL:
+# CURL #3:
 curl -X 'PUT' \
   'http://127.0.0.1:3000/lists/2/sets/788' \
   -H 'accept: application/json' \
@@ -53,16 +51,15 @@ curl -X 'PUT' \
   -d '{
   "status": "wishlist"
 }'
-# Response:
+# Response #3:
 {
   "message": "List entry for set 788 has been created with status 'wishlist'",
   "username": "bobby",
   "set_id": 788,
   "status": "wishlist"
 }
-
-4. 
-# CURL:
+ 
+# CURL #4:
 curl -X 'PUT' \
   'http://127.0.0.1:3000/lists/sarah123/sets/1' \
   -H 'accept: application/json' \
@@ -71,7 +68,7 @@ curl -X 'PUT' \
   -d '{
   "status": "purchased"
 }'
-# Response:
+# Response #4:
 {
   "message": "List entry for set 1 has been updated with status 'purchased'",
   "username": "sarah123",
@@ -86,13 +83,13 @@ Maya wants to see how far she’s gotten through her Lego wishlist and what’s 
 2. Curious about one of the remaining sets, she calls GET /sets/83726 to check the set’s details and decide whether to start it next.
 3. Realizing that she already purchased this set last week, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
 
-1. 
-# CURL:
+ 
+# CURL #1:
 curl -X 'GET' \
   'http://127.0.0.1:3000/lists/2/progress' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
-# Response:
+# Response #1:
 {
   "message": "Displayed progress for user bobby",
   "progress": {
@@ -115,13 +112,13 @@ curl -X 'GET' \
   }
 }
 
-2. 
-# CURL:
+ 
+# CURL #2:
 curl -X 'GET' \
   'http://127.0.0.1:3000/sets/50' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
-# Response:
+# Response #2:
 {
   "message": "Displays details for set 50",
   "set_details": {
@@ -133,9 +130,8 @@ curl -X 'GET' \
     "theme_name": "Supplemental"
   }
 }
-
-3. 
-# CURL:
+ 
+# CURL #3:
 curl -X 'PUT' \
   'http://127.0.0.1:3000/lists/maya789/sets/1' \
   -H 'accept: application/json' \
@@ -144,7 +140,8 @@ curl -X 'PUT' \
   -d '{
         "status": "purchased"
       }'
-# Response:
+
+# Response #3:
 {
   "message": "List entry for set 1 has been created with status 'purchased'",
   "username": "maya789",
@@ -159,17 +156,17 @@ Jim is new to legos and is unsure what sets to go for next. He decides to check 
 2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
 3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
 
-1. 
-# CURL: 
+ 
+# CURL #1: 
 curl -X 'GET' \
   'http://127.0.0.1:3000/users/7/friends/8/activity' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 
-# RESPONSE:
+# RESPONSE #1:
 {
   "friend username": "Pam12345",
-  "friends": [
+  "activity": [
     {
       "set id": 1819,
       "set name": "Gamma V Laser Craft",
@@ -197,15 +194,15 @@ curl -X 'GET' \
   ]
 }
 
-2.
-# CURL
+
+# CURL #2
 curl -X 'GET' \
   'http://127.0.0.1:3000/sets/1819' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 
 
-# RESPONSE: 
+# RESPONSE #2: 
 {
   "message": "Displays details for set 1819",
   "set_details": {
@@ -217,9 +214,8 @@ curl -X 'GET' \
     "theme_name": "Classic Space"
   }
 }
-
-3. 
-# CURL:
+ 
+# CURL #3:
 curl -X 'PUT' \
   'http://127.0.0.1:3000/lists/jim012/sets/1' \
   -H 'accept: application/json' \
@@ -228,7 +224,7 @@ curl -X 'PUT' \
   -d '{
   "status": "wishlist"
 }'
-# Response:
+# Response #3:
 {
   "message": "List entry for set 1 has been created with status 'wishlist'",
   "username": "jim012",
