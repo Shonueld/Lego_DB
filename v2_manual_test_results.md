@@ -1,0 +1,123 @@
+## Example Flow 1 – Parent Searching for a Gift
+Sarah is shopping for a Lego set for her 10-year-old son’s birthday. She wants something age-appropriate, under $60, and not too complex.
+
+1. Sarah starts by calling GET /sets with filters for age piece count under 500, with Mario theme, that came out after 2018 and piece count under 500 to find suitable gift options.
+2. She finds a set and calls GET /sets/91234 to view more details about the set.
+3. Satisfied with the difficulty and reviews, she calls PUT /users/sarah123/sets/91234 to mark it as "wishlist" so she doesn’t forget it.
+4. Later, she purchases it and updates her status by calling PUT /users/sarah123/sets/91234 again, this time marking the status as "purchased."
+
+4. 
+# CURL:
+curl -X 'PUT' \
+  'http://127.0.0.1:3000/lists/sarah123/sets/1' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "status": "purchased"
+}'
+# Response:
+{
+  "message": "List entry for set 1 has been updated with status 'purchased'",
+  "username": "sarah123",
+  "set_id": 1,
+  "status": "purchased"
+}
+
+## Example Flow 3 – Tracking Wishlist Completion
+Maya wants to see how far she’s gotten through her Lego wishlist and what’s left to buy and build.
+
+1. Maya begins by calling GET /users/maya789/wishlist/progress to view her overall progress across all sets. The database tells her she’s wishlisted 10 sets, purchased 4, is building 2, has built 1, and has 3 remaining.
+2. Curious about one of the remaining sets, she calls GET /sets/83726 to check the set’s details and decide whether to start it next.
+3. Realizing that she already purchased this set last week, she updates her status by calling PUT /users/maya789/sets/83726 to mark it as "purchased."
+
+1. 
+# CURL:
+curl -X 'GET' \
+  'http://127.0.0.1:3000/lists/2/progress' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+# Response:
+{
+  "message": "Displayed progress for user bobby",
+  "progress": {
+    "building": {
+      "count": 0,
+      "sets": []
+    },
+    "built": {
+      "count": 0,
+      "sets": []
+    },
+    "purchased": {
+      "count": 0,
+      "sets": []
+    },
+    "wishlist": {
+      "count": 0,
+      "sets": []
+    }
+  }
+}
+
+2. 
+# CURL:
+curl -X 'GET' \
+  'http://127.0.0.1:3000/sets/50' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat'
+# Response:
+{
+  "message": "Displays details for set 50",
+  "set_details": {
+    "id": 50,
+    "set_number": "1240-2",
+    "name": "8 Road Signs",
+    "year_released": 1955,
+    "number_of_parts": 8,
+    "theme_name": "Supplemental"
+  }
+}
+
+3. 
+# CURL:
+curl -X 'PUT' \
+  'http://127.0.0.1:3000/lists/maya789/sets/1' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "status": "purchased"
+      }'
+# Response:
+{
+  "message": "List entry for set 1 has been created with status 'purchased'",
+  "username": "maya789",
+  "set_id": 1,
+  "status": "purchased"
+}
+
+## Example Flow 4 – Getting Inspiration From Friends
+Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
+
+1. He starts by calling GET /users/jim012/friends/activity to view what sets Pam has recently built, wishlisted, or reviewed.
+2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
+3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
+
+3. 
+# CURL:
+curl -X 'PUT' \
+  'http://127.0.0.1:3000/lists/jim012/sets/1' \
+  -H 'accept: application/json' \
+  -H 'access_token: brat' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "status": "wishlist"
+}'
+# Response:
+{
+  "message": "List entry for set 1 has been created with status 'wishlist'",
+  "username": "jim012",
+  "set_id": 1,
+  "status": "wishlist"
+}
