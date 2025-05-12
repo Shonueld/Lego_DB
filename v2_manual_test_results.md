@@ -181,9 +181,9 @@ curl -X 'PUT' \
 ## Example Flow 4 – Getting Inspiration From Friends
 Jim is new to legos and is unsure what sets to go for next. He decides to check out his friend Pam's profile for some inspiration.
 
-1. (Assuming Him already has an account with Pam, who is also active) He starts by calling GET /users/9/friends/10/activity to view what sets Pam has recently built, wishlisted, or reviewed.
-2. He notices that Pam recently built and reviewed a "Hogwarts Castle" set, so he calls GET /sets/1819 to learn more about it.
-3. Impressed by the theme and difficulty, Jim calls PUT /users/jim012/sets/1819 to mark it as "wishlist" so he can remember it for later.
+1. (Assuming Jim already has an account with Pam, who is also active) He starts by calling GET /users/9/friends/10/activity to view what sets Pam has recently changed the status of, or reviewed.
+2. He notices that Pam recently built and reviewed a Harry Potter set, so he calls GET /sets/19195 to learn more about it.
+3. Impressed by the theme and difficulty, Jim calls PUT /users/Jim/sets/19195 to mark it as "wishlist" so he can remember it for later.
 
  
 # CURL #1: 
@@ -194,31 +194,46 @@ curl -X 'GET' \
 
 # RESPONSE #1:
 {
-  "friend username": "Pam12345",
+  "friend username": "Pam",
   "activity": [
     {
-      "set id": 1819,
-      "set name": "Gamma V Laser Craft",
-      "status": "wishlist",
-      "created at": "2025-05-12T02:22:32.913853+00:00"
-    },
-    {
-      "set id": 900,
-      "set name": "Lear Jet",
+      "set id": 19195,
+      "set name": "Wizarding World Minifigure Accessory Set",
       "status": "built",
-      "created at": "2025-05-12T02:21:40.712335+00:00"
+      "created at": "2025-05-12T20:44:57.950160+00:00"
     },
     {
-      "set id": 100,
-      "set name": "Sloping Ridge and Valley Bricks, Red",
+      "set id": 19192,
+      "set name": "Magical Ideas",
+      "status": "purchased",
+      "created at": "2025-05-12T20:44:51.495411+00:00"
+    },
+    {
+      "set id": 19188,
+      "set name": "Owen with Helicopter",
+      "status": "purchased",
+      "created at": "2025-05-12T20:44:46.679438+00:00"
+    },
+    {
+      "set id": 19181,
+      "set name": "Sinjin Prescott with Buggy",
+      "status": "purchased",
+      "created at": "2025-05-12T20:44:44.472903+00:00"
+    },
+    {
+      "set id": 19180,
+      "set name": "Harry Potter: Prépare-toi pour la magie!",
       "status": "built",
-      "created at": "2025-05-12T02:21:34.105437+00:00"
-    },
+      "created at": "2025-05-12T20:44:38.443403+00:00"
+    }
+  ],
+  "reviews": [
     {
-      "set id": 91,
-      "set name": "LEGO Town Plan Wooden Board",
-      "status": "wishlist",
-      "created at": "2025-05-12T02:21:05.992547+00:00"
+      "set id": 19195,
+      "set name": "Wizarding World Minifigure Accessory Set",
+      "created at": "2025-05-12T20:48:05.730152+00:00",
+      "rating": 1,
+      "description": "Absolutely terrible, doesn't look like the photos"
     }
   ]
 }
@@ -226,27 +241,27 @@ curl -X 'GET' \
 
 # CURL #2
 curl -X 'GET' \
-  'http://127.0.0.1:3000/sets/1819' \
+  'http://127.0.0.1:3000/sets/19195' \
   -H 'accept: application/json' \
   -H 'access_token: brat'
 
 
 # RESPONSE #2: 
 {
-  "message": "Displays details for set 1819",
+  "message": "Displays details for set 19195",
   "set_details": {
-    "id": 1819,
-    "set_number": "6891-1",
-    "name": "Gamma V Laser Craft",
-    "year_released": 1985,
-    "number_of_parts": 135,
-    "theme_name": "Classic Space"
+    "id": 19195,
+    "set_number": "40500-1",
+    "name": "Wizarding World Minifigure Accessory Set",
+    "year_released": 2021,
+    "number_of_parts": 33,
+    "theme_name": "Harry Potter"
   }
 }
  
 # CURL #3:
 curl -X 'PUT' \
-  'http://127.0.0.1:3000/lists/jim012/sets/1' \
+  'http://127.0.0.1:3000/lists/9/sets/19195' \
   -H 'accept: application/json' \
   -H 'access_token: brat' \
   -H 'Content-Type: application/json' \
@@ -255,8 +270,8 @@ curl -X 'PUT' \
 }'
 # Response #3:
 {
-  "message": "List entry for set 1 has been created with status 'wishlist'",
-  "username": "jim012",
-  "set_id": 1,
+  "message": "List entry for set 19195 has been created with status 'wishlist'",
+  "username": "Jim",
+  "set_id": 19195,
   "status": "wishlist"
 }
