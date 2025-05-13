@@ -76,7 +76,7 @@ def add_friends(user_id: int, friend:Friend):
 
     return {"message": f"User:'{user_id}' added friend {friend.friend_id}"}
 
-@router.get("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
+@router.get("/{user_id}/friends", status_code=status.HTTP_200_OK)
 def get_friends(user_id: int):
     with db.engine.begin() as connection:
         username = connection.execute(
@@ -98,14 +98,14 @@ def get_friends(user_id: int):
                 """),
             {"user_id": user_id,},).fetchall()
         
-        friends = [{"friend_id": row.username} for row in result]
+        friends = [{"friend_username": row.username} for row in result]
     
 
     if username:
         return {"user": username, "friends": friends}
     return{"user not found"}
 
-@router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_201_CREATED)
+@router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_200_OK)
 def get_friends(user_id: int, friend_id:int ):
     with db.engine.begin() as connection:
 
@@ -159,19 +159,19 @@ def get_friends(user_id: int, friend_id:int ):
 
     for row in result:
         entry = {
-            "set id": row.id,
-            "set name": row.name,
+            "set_id": row.id,
+            "set_name": row.name,
             "status": row.status,
-            "created at": row.created_at
+            "created_at": row.created_at
         }
 
         activity.append(entry)
 
     for row in resultReviews:
         entry = {
-            "set id": row.id,
-            "set name": row.name,
-            "created at": row.created_at
+            "set_id": row.id,
+            "set_name": row.name,
+            "created_at": row.created_at
         }
 
         if row.rating is not None:
@@ -181,5 +181,5 @@ def get_friends(user_id: int, friend_id:int ):
             reviews.append(review_entry)
             
 
-    return {"friend username": friend_username, "activity": activity, "reviews": reviews} 
+    return {"friend_username": friend_username, "activity": activity, "reviews": reviews} 
 
