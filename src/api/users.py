@@ -37,16 +37,18 @@ def create_user(new_user: NewUser):
         if result > 0:
             raise HTTPException(status_code=400, detail="Username already exists")
 
-        connection.execute(
+        user_id = connection.execute(
             sqlalchemy.text(
                 """
                 INSERT INTO users (username)
                 VALUES (:username)
+                RETURNING user_id
                 """
             ),
             {"username": new_user.username},
-        )
-    return {"message": f"User '{new_user.username}' created successfully"}
+        ).scalar_one()
+
+    return {"message": f"User '{new_user.username}' created successfully with id {user_id}"}
 
 @router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
 def add_friends(user_id: int, friend:Friend):
