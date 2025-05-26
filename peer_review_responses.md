@@ -91,6 +91,7 @@ API Design Comments:
 
 1. API Endpoint /sets is very slow and returns too many results.
 Perhaps limit the return results.
+- Limited results to 50 by default, now paginates results
 2. Under API Endpoint /lists/{user_id}/sets/{set_id}, make it a dropdown to change the status instead of a json input that can be mistyped
 3. for API Endpoint sets/{set_id} maybe rename to have a bit more detail such as sets/info/{set_id}
 4. API Endpoint /sets/{set_id}/issues does not have a limit

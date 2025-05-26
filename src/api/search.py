@@ -18,9 +18,12 @@ def search_sets(
     max_year: Optional[int] = Query(None, description="Maximum year of release"),
     theme: Optional[str] = Query(None, description="Theme name to filter by"),
     name: Optional[str] = Query(None, description="Name of the set to search for"),
+    limit: int = Query(50, ge=1, le=100, description="Number of results to return"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
 ):
     """
     Search for LEGO sets using optional filters like piece count, year, and theme.
+    Supports pagination using limit and offset.
     """
     query = """
         SELECT id, set_number, name, year_released, number_of_parts, theme_name
@@ -52,6 +55,10 @@ def search_sets(
     if name is not None:
         query += " AND name ILIKE :name"
         params["name"] = f"%{name}%"
+
+    query += " LIMIT :limit OFFSET :offset"
+    params["limit"] = limit
+    params["offset"] = offset
 
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(query), params)
