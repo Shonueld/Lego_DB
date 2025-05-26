@@ -104,10 +104,13 @@ Perhaps limit the return results
 Currently it doesn't return username, created_at, or the id of the review itself which creating an Issue has in it's response message
 11. API Endpoint for /users/{user_id}/friends are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
+- This is standard RESTful and shouldn't be changed
 12. API Endpoint for /sets/{set_id}/reviews are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
+- This is standard RESTful and shouldn't be changed
 13. API Endpoint for /sets/{set_id}/issues are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
+- This is standard RESTful and shouldn't be changed
 
 Lucas Pierce Comments:
 1. What is the point of /users/{user_id}/friends/{friend_id}/activity? Why not just have a get activity endpoint for users?
