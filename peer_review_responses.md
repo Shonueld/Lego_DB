@@ -1,0 +1,98 @@
+Code Review Comments:
+
+1. /lists/{user_id}/sets/{set_id} gave me : Internal Server Error, maybe there are too many options so it is too slow?
+2. /sets/{set_id}/reviews I put set id 1 and user id 1, rating 2 description bad and it gave me : Internal Server Error
+3. /sets/{set_id}/issues i had input set id 1, user id 1, Internal Server Error
+4. /sets/ - bad input such as negative number isn't caught and just breaks also. There should be some sort of checks to make sure these inputs are valid numbers, if it is negative just make it equal to 0, make an error saying that
+5. /sets/{set_id}/reviews the post and get are the same here, not sure if this would cause confusion, maybe just change to add Review and search review, same with friends, and issues?
+6. for reviews of a set there should be some limitation to prevent spamming or some negative words that could be inappropriate.
+7. implement logging when creating users and adding friends so you have an easier way to see history
+8. add more detail to friends, there is no way to accept or decline it is just a one way decision
+9. /sets/ if max and min are switched this wouldn't make sense instead we can test for this special case or if max and min are equal
+10. updates status doesn't catch if the updated status is same as previous and will say updated, this is not true because nothing changed
+11. overall everything took forever to run on my end, not sure if this is because of your code or on my end but it isn't happening in my other projects so definitely something to look into, maybe you can make things more efficient on your end.
+12. overall more precise error messages would be helpful
+
+1. Under @router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_200_OK) and @router.get("/{user_id}/friends", status_code=status.HTTP_200_OK) both functions are called get_friends
+2. When creating users or adding friends, there can be logging implemented to allow for easier backend debugging.
+3. On @router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED), where it returns {"message": "Invalid ids or attempting to enter duplicates"}, it could be more clear as to whether it is because of invalid ids or attempting to enter duplicates.
+4. user_id is fetched multiple times, a abstract helper function can help reduce repetition
+5. In sets.py and other files where a dictionary is being returned, response models can be used for clarity.
+6. Friends for now stores a one directional friendship, a bidirectional design may make more sense. If you wanted to keep it one directional, perhaps a follower and following may make more sense.
+7. Validation to check if foreign keys exist should be implemented before attempting inserts, like seeing if set_id in /sets/{set_id}/reviews actually exists.
+8. For sets, id is referred to as sets.id, while for users, id is called user_id. Standardizing this for primary keys across the tables can make it less error prone.
+9. Some files import Enum and Optional without ever using them.
+10. In reviews.py, the sort_clause is hardcoded into the get_all_reviews function. sort_clause can be its own function so that it can also be called in users.py when getting friend’s reviews.
+11. Something should be implemented to prevent a user from putting multiple reviews on a set.
+12. When dict(row._mapping) is used on return statements; there should be a response model so that it is consistent throughout the other files that also return a dictionary.
+
+1. Under the endpoint users/{user_id}/friends/{friend_id}/activity
+Error in logic where if the friend has no activity, it returns "Not Friends" even if they are friends
+This is at line 156 of users.py
+2. Under the endpoint lists/{user_id}/progress there is a redudant Order By Query
+The comment on line 103 of lists.py specifies its meant to group by the status, which is great if we are meant to be viewing this query.
+However, it immediately sorts the results queried into a dictionary meaning the order by isn't neccessary.
+3. Friends are not mutual when adding. User 1 could be friends with User 2, yet User 2 is not friends with User 1.
+Maybe implement a method of confirming friendship, or not counting as friends until it is mutual.
+4. Under add_friends in users.py, if inputting the same user id (Example: User 1 adding User 1 as a friend) it returns internal server error
+5. line 108 in users.py returns "User Not Found" but should properly use a HTTPException to exit the code
+6. get_friends function has 2 separate Queries to get Username and Friends, but could be combined into 1 Query
+7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise Error message.
+8. This is a continuation of issue #7 as it returns a dictionary response when it should properly return an HTTPException to exit the code.
+9. lines 50-60 on lists.py are updating the status. However, if the updated status is the same as the previous status, it still returns the message "updated" even though no change occured.
+10. Continuation of Issue 1
+Not entirely sure why this is happening, but even if there is activity it just returns "Not Friends"
+11. Overall using dicts to return data instead of using Pydantic models. This is fine but Pydantic models allows for better control and modifying of the code in the future.
+12. When trying to update the status of a set that doesn't exist, there isn't a catch for that, meaning it returns an Internal Server Error.
+
+API Design Comments:
+
+1. /users/{user_id}/friends gave me :
+{
+"message": "Invalid ids or attempting to enter duplicates"
+}
+2. /sets/ wont give me anything if I don't use the filters but in description says optional
+3. add feature to block friend request, maybe there is someone who you don't want to be associated with
+4. add feature to report user for misconduct such as bad comments being posted
+5. something that lists suggested friends because otherwise how would you know what their id is
+6. add some sort of leaderboard feature so that there is a community aspect
+7. I think it would be cool to add not only other users as friends but groups so people with similar interests, locations, or projects can talk and be in a sub group
+8. I feel like adding a time stamp to when the friendship was created could be nice for tracking and also a fun leaderboard later for longest friendships
+9. Also a timestamp on when the issues were published would be good because if it gets resolved a time stamp would help a user figure out when it was reported and if that is an old or new issue
+10. for the review I think it would be good to add the user id of the person who submitted it, this information wouldn't be shared but it would be stored in case something bad is posted or someone is spamming then you know who is the problem
+11. maybe some sort of feature where friends could collaborate on a lego project, so some way to add multiple people to project
+12. not sure if it would be helpful to make the id labels more specific so if you are doing quarries and joining tables it is easier for readability.
+
+1. For user_id and friend_id, the use of unique when creating the alembic table can be used to prevent duplicates.
+2. On lists.py, the lists.status column accepts arbitrary strings. ENUM can be used so that only {"wishlist", "purchased", "building", "built"} are accepted.
+3. For reviews and list entries, an updated_at timestamp can make tracking entries easier.
+4. post_issue() returns both user_id and username, which can be redundant.
+5. The review structure in friend activity is inconsistent with the review structure in reviews.
+6. The ability to delete users, friends, sets from lists, and reviews should be implemented.
+7. A primary key id for the friends table can help with management and tracking.
+8. For status and username, it should not be allowed to be NULL.
+9. Username should have a character limit just so that the data is more consistent.
+10. Users should only be able to leave one review per set, so a unique constraint should be implemented.
+11. For lists, users should also only be able to have one entry per set so a unique constraint should also be added.
+12. CHECK constraints for reviews.rating can be implemented in the database columns even though it may be added in reviews.py
+
+1. API Endpoint /sets is very slow and returns too many results.
+Perhaps limit the return results.
+2. Under API Endpoint /lists/{user_id}/sets/{set_id}, make it a dropdown to change the status instead of a json input that can be mistyped
+3. for API Endpoint sets/{set_id} maybe rename to have a bit more detail such as sets/info/{set_id}
+4. API Endpoint /sets/{set_id}/issues does not have a limit
+Perhaps limit the return results
+5. Create constraints on valid set id. (User is able to input negative ids which don't exist)
+6. Issues API Endpoints is labeled as /sets
+7. Reviews API Endpoints is labeled as /sets
+8. Reviews are able to have no description (not sure if that is intended)
+9. Issues are able to have no description (pretty sure thats not intended)
+10. I feel like Reviews should have a similar return message format as Issues.
+Currently it doesn't return username, created_at, or the id of the review itself which creating an Issue has in it's response message
+11. API Endpoint for /users/{user_id}/friends are duplicated. One is for POST and one is for GET.
+Rename them to distinguish them apart since this could potentially create conflicts.
+12. API Endpoint for /sets/{set_id}/reviews are duplicated. One is for POST and one is for GET.
+Rename them to distinguish them apart since this could potentially create conflicts.
+13. API Endpoint for /sets/{set_id}/issues are duplicated. One is for POST and one is for GET.
+Rename them to distinguish them apart since this could potentially create conflicts.
+
