@@ -103,18 +103,27 @@ API Design Comments:
 
 1. API Endpoint /sets is very slow and returns too many results.
 Perhaps limit the return results.
-- Limited results to 50 by default, now paginates results
+- Limited results to 50 by default and added an option to choose how many to return, now paginates results
 2. Under API Endpoint /lists/{user_id}/sets/{set_id}, make it a dropdown to change the status instead of a json input that can be mistyped
+- I dont think this is an issue, no user would actually be interacting with our endpoints like this
 3. for API Endpoint sets/{set_id} maybe rename to have a bit more detail such as sets/info/{set_id}
+- I think its fine as it is, you get the set with the given ID, and you get all of its details
 4. API Endpoint /sets/{set_id}/issues does not have a limit
 Perhaps limit the return results
+- Same thing as resolving issue 1, added pagination
 5. Create constraints on valid set id. (User is able to input negative ids which don't exist)
+- If a user calls GET /sets on a negative ID it says set not found as you would expect
 6. Issues API Endpoints is labeled as /sets
+- Because they are issues with the set
 7. Reviews API Endpoints is labeled as /sets
+- Because they are reviews on the sets
 8. Reviews are able to have no description (not sure if that is intended)
+- Intended
 9. Issues are able to have no description (pretty sure thats not intended)
+- Issues now requires users to input a description that is not empty
 10. I feel like Reviews should have a similar return message format as Issues.
 Currently it doesn't return username, created_at, or the id of the review itself which creating an Issue has in it's response message
+- Reviews currently returns a message (added/updated) set_id, user_id, rating, and description which I feel is sufficient
 11. API Endpoint for /users/{user_id}/friends are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
 - This is standard RESTful and shouldn't be changed

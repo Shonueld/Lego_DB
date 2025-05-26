@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List
 from datetime import datetime
@@ -23,7 +23,7 @@ class IssueResponse(BaseModel):
 
 class IssueRequest(BaseModel):
     user_id: int
-    message: str
+    message: str = Field(..., min_length=1, description="Issue description must not be empty.")
 
 @router.post("/sets/{set_id}/issues", status_code=status.HTTP_201_CREATED)
 def post_issue(set_id: int, issue: IssueRequest):
@@ -85,7 +85,7 @@ def post_issue(set_id: int, issue: IssueRequest):
     }
 
 @router.get("/sets/{set_id}/issues", response_model=List[IssueResponse])
-def get_issues_for_set(set_id: int):
+def get_issues_for_set(set_id: int, limit: int = Query(50, ge=1), offset: int = Query(0, ge=0)):
     """
     Retrieve all issues reported for a specific set.
     """
@@ -98,9 +98,10 @@ def get_issues_for_set(set_id: int):
                 JOIN users u ON i.user_id = u.user_id
                 WHERE i.set_id = :set_id
                 ORDER BY i.created_at DESC
+                LIMIT :limit OFFSET :offset
                 """
             ),
-            {"set_id": set_id}
+            {"set_id": set_id, "limit": limit, "offset": offset}
         )
         issues = result.fetchall()
 
