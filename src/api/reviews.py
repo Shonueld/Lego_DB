@@ -32,19 +32,64 @@ def add_review(set_id: int, review: ReviewRequest):
     if review.rating < 1 or review.rating > 5:
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
     
+    # Check if the has built set
     with db.engine.begin() as connection:
-        connection.execute(
+        built_check = connection.execute(
             sqlalchemy.text(
                 """
-                INSERT INTO reviews (set_id, user_id, rating, description)
-                VALUES (:set_id, :user_id, :rating, :description)
+                SELECT 1 FROM lists
+                WHERE user_id = :user_id AND set_id = :set_id AND status = 'built'
                 """
             ),
-            {"set_id": set_id, "user_id": review.user_id, "rating": review.rating, "description": review.description}
-        )
+            {"user_id": review.user_id, "set_id": set_id}
+        ).scalar_one_or_none()
+
+        if not built_check:
+            raise HTTPException(status_code=400, detail="Set has not been built by the user.")
+        
+        existing_review = connection.execute(
+            sqlalchemy.text(
+                "SELECT review_id FROM reviews WHERE user_id = :user_id AND set_id = :set_id"
+            ),
+            {"user_id": review.user_id, "set_id": set_id}
+        ).scalar_one_or_none()
+
+        if existing_review:
+            connection.execute(
+                sqlalchemy.text(
+                    """
+                    UPDATE reviews
+                    SET rating = :rating, description = :description, created_at = NOW()
+                    WHERE user_id = :user_id AND set_id = :set_id
+                    """
+                ),
+                {
+                    "rating": review.rating,
+                    "description": review.description,
+                    "user_id": review.user_id,
+                    "set_id": set_id
+                }
+            )
+            message = "Review successfully updated."
+        else:
+            connection.execute(
+                sqlalchemy.text(
+                    """
+                    INSERT INTO reviews (set_id, user_id, rating, description)
+                    VALUES (:set_id, :user_id, :rating, :description)
+                    """
+                ),
+                {
+                    "set_id": set_id,
+                    "user_id": review.user_id,
+                    "rating": review.rating,
+                    "description": review.description
+                }
+            )
+            message = "Review successfully added."
     
     return {
-        "message": f"Review successfully added.",
+        "message": message,
         "data": {
             "set_id": set_id,
             "user_id": review.user_id,

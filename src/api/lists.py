@@ -38,6 +38,19 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
 
         username = user.username
 
+
+        # Check if the set exists
+        set_exists = conn.execute(
+            sqlalchemy.text("""
+                SELECT 1 FROM sets WHERE id = :set_id
+            """),
+            {"set_id": set_id}
+        ).scalar_one_or_none()
+
+        if not set_exists:
+            raise HTTPException(status_code=404, detail=f"Set with ID {set_id} not found.")
+
+
         # 2. Check if the list entry already exists
         existing = conn.execute(
             sqlalchemy.text("""
@@ -48,6 +61,21 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
         ).fetchone()
 
         if existing:
+            current_status = conn.execute(
+                sqlalchemy.text("""
+                    SELECT status FROM lists WHERE list_id = :list_id
+                """),
+                {"list_id": existing.list_id}
+            ).scalar_one()
+
+            if current_status == body.status:
+                return {
+                    "message": f"List entry for set {set_id} already has status '{body.status}'",
+                    "username": username,
+                    "set_id": set_id,
+                    "status": body.status
+                }
+
             # Update existing status
             conn.execute(
                 sqlalchemy.text("""

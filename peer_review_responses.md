@@ -1,17 +1,29 @@
 Code Review Comments:
 
 1. /lists/{user_id}/sets/{set_id} gave me : Internal Server Error, maybe there are too many options so it is too slow?
+- Hard to say exactly why this happened without the details from their terminal, its liekly that the set didnt exist and thats why it 500'd however. Added a check to make sure a set_id exists before adding it to your list.
 2. /sets/{set_id}/reviews I put set id 1 and user id 1, rating 2 description bad and it gave me : Internal Server Error
+- I was able to do it on my end, but a different issue is that users who didnt build the set could still review it, so we added that constraint
 3. /sets/{set_id}/issues i had input set id 1, user id 1, Internal Server Error
+- Issues now makes sure that the user has the list in their set, the set exists, and that the user exists
 4. /sets/ - bad input such as negative number isn't caught and just breaks also. There should be some sort of checks to make sure these inputs are valid numbers, if it is negative just make it equal to 0, make an error saying that
+- Using negative numbers doesn't break the query, it does just act as a zero which I think is as expected, would need a more specific example of what caused the error
 5. /sets/{set_id}/reviews the post and get are the same here, not sure if this would cause confusion, maybe just change to add Review and search review, same with friends, and issues?
+- That's standard RESTful format, the same routes but one being POST and the other being GET is completely normal
 6. for reviews of a set there should be some limitation to prevent spamming or some negative words that could be inappropriate.
+- Users are now limited to one review per set, and their review will get updated instead if they try to post a new review for a set they have already reviewed. 
 7. implement logging when creating users and adding friends so you have an easier way to see history
+- WILL ADRESS AFTER FOLLOWER CHANGE
 8. add more detail to friends, there is no way to accept or decline it is just a one way decision
+- WILL ADDRESS AFTER FOLLOW CHANGE
 9. /sets/ if max and min are switched this wouldn't make sense instead we can test for this special case or if max and min are equal
+- I feel like that behaves as you would expect, if min is higher than max they no sets are returned
 10. updates status doesn't catch if the updated status is same as previous and will say updated, this is not true because nothing changed
+- Lists now checks the current status, and says "List entry for set X already has status 'status_name'
 11. overall everything took forever to run on my end, not sure if this is because of your code or on my end but it isn't happening in my other projects so definitely something to look into, maybe you can make things more efficient on your end.
+- Probably a result of using a large database of 25000 sets, but no one else has had this issue, and the render deployment hasnt either
 12. overall more precise error messages would be helpful
+- Addressed from the previous changes that no longer just return 500s
 
 1. Under @router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_200_OK) and @router.get("/{user_id}/friends", status_code=status.HTTP_200_OK) both functions are called get_friends
 2. When creating users or adding friends, there can be logging implemented to allow for easier backend debugging.

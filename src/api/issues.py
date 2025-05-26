@@ -40,6 +40,22 @@ def post_issue(set_id: int, issue: IssueRequest):
         if not user_row:
             raise HTTPException(status_code=404, detail="User not found.")
 
+        set_row = connection.execute(
+            sqlalchemy.text("SELECT 1 FROM sets WHERE id = :set_id"),
+            {"set_id": set_id}
+        ).fetchone()
+
+        if not set_row:
+            raise HTTPException(status_code=404, detail="Set not found.")
+
+        list_entry = connection.execute(
+            sqlalchemy.text("SELECT 1 FROM lists WHERE user_id = :user_id AND set_id = :set_id"),
+            {"user_id": issue.user_id, "set_id": set_id}
+        ).fetchone()
+
+        if not list_entry:
+            raise HTTPException(status_code=400, detail="Set is not in user's list.")
+
         # Insert issue and return new row info
         result = connection.execute(
             sqlalchemy.text(
