@@ -46,6 +46,7 @@ The comment on line 103 of lists.py specifies its meant to group by the status, 
 However, it immediately sorts the results queried into a dictionary meaning the order by isn't neccessary.
 -   Completed
 3. Friends are not mutual when adding. User 1 could be friends with User 2, yet User 2 is not friends with User 1.
+-   Completed (friendships have been replaced by a one-way follower relationship)
 Maybe implement a method of confirming friendship, or not counting as friends until it is mutual.
 4. Under add_friends in users.py, if inputting the same user id (Example: User 1 adding User 1 as a friend) it returns internal server error
 5. line 108 in users.py returns "User Not Found" but should properly use a HTTPException to exit the code
@@ -53,10 +54,13 @@ Maybe implement a method of confirming friendship, or not counting as friends un
 7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise Error message.
 8. This is a continuation of issue #7 as it returns a dictionary response when it should properly return an HTTPException to exit the code.
 9. lines 50-60 on lists.py are updating the status. However, if the updated status is the same as the previous status, it still returns the message "updated" even though no change occured.
+-   Completed
 10. Continuation of Issue 1
 Not entirely sure why this is happening, but even if there is activity it just returns "Not Friends"
 11. Overall using dicts to return data instead of using Pydantic models. This is fine but Pydantic models allows for better control and modifying of the code in the future.
+-   In progress
 12. When trying to update the status of a set that doesn't exist, there isn't a catch for that, meaning it returns an Internal Server Error.
+-   
 
 API Design Comments:
 
