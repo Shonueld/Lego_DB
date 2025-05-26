@@ -15,7 +15,7 @@ Code Review Comments:
 7. implement logging when creating users and adding friends so you have an easier way to see history
 - WILL ADRESS AFTER FOLLOWER CHANGE
 8. add more detail to friends, there is no way to accept or decline it is just a one way decision
-- WILL ADDRESS AFTER FOLLOW CHANGE
+- We ended up pivoting from friends to followers, as we felt one way behaviour made more sense
 9. /sets/ if max and min are switched this wouldn't make sense instead we can test for this special case or if max and min are equal
 - I feel like that behaves as you would expect, if min is higher than max they no sets are returned
 10. updates status doesn't catch if the updated status is same as previous and will say updated, this is not true because nothing changed
