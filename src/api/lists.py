@@ -136,7 +136,6 @@ def get_list_progress(user_id: int):
                 FROM lists l
                 JOIN sets s ON l.set_id = s.id
                 WHERE l.user_id = :user_id
-                ORDER BY l.status, s.name
                 """
             ),
             {"user_id": user_id}

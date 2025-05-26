@@ -44,6 +44,7 @@ This is at line 156 of users.py
 2. Under the endpoint lists/{user_id}/progress there is a redudant Order By Query
 The comment on line 103 of lists.py specifies its meant to group by the status, which is great if we are meant to be viewing this query.
 However, it immediately sorts the results queried into a dictionary meaning the order by isn't neccessary.
+-   Completed
 3. Friends are not mutual when adding. User 1 could be friends with User 2, yet User 2 is not friends with User 1.
 Maybe implement a method of confirming friendship, or not counting as friends until it is mutual.
 4. Under add_friends in users.py, if inputting the same user id (Example: User 1 adding User 1 as a friend) it returns internal server error
