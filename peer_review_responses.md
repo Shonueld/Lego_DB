@@ -25,9 +25,16 @@ Code Review Comments:
 12. overall more precise error messages would be helpful
 - Addressed from the previous changes that no longer just return 500s
 
+
 1. Under @router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_200_OK) and @router.get("/{user_id}/friends", status_code=status.HTTP_200_OK) both functions are called get_friends
+- Function name was changed on both endpoints  
+
 2. When creating users or adding friends, there can be logging implemented to allow for easier backend debugging.
+- Table added to log and see which user is following who.
+
 3. On @router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED), where it returns {"message": "Invalid ids or attempting to enter duplicates"}, it could be more clear as to whether it is because of invalid ids or attempting to enter duplicates.
+- 
+
 4. user_id is fetched multiple times, a abstract helper function can help reduce repetition
 5. In sets.py and other files where a dictionary is being returned, response models can be used for clarity.
 6. Friends for now stores a one directional friendship, a bidirectional design may make more sense. If you wanted to keep it one directional, perhaps a follower and following may make more sense.
@@ -37,6 +44,7 @@ Code Review Comments:
 10. In reviews.py, the sort_clause is hardcoded into the get_all_reviews function. sort_clause can be its own function so that it can also be called in users.py when getting friend’s reviews.
 11. Something should be implemented to prevent a user from putting multiple reviews on a set.
 12. When dict(row._mapping) is used on return statements; there should be a response model so that it is consistent throughout the other files that also return a dictionary.
+
 
 1. Under the endpoint users/{user_id}/friends/{friend_id}/activity
 Error in logic where if the friend has no activity, it returns "Not Friends" even if they are friends
