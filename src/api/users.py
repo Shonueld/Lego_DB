@@ -50,52 +50,87 @@ def create_user(new_user: NewUser):
 
     return {"message": f"User '{new_user.username}' created successfully with id {user_id}"}
 
+
 @router.post("/{user_id}/follow", status_code=status.HTTP_201_CREATED)
 def follow_another_user(user_id: int, following: FollowUserRequest):
     with db.engine.begin() as connection:
-        insert_result = connection.execute(
+        # Verify both users exist
+        user_exists = connection.execute(
             sqlalchemy.text(
                 """
-                WITH valid_ids AS (
-                    SELECT 1
-                    FROM users u1, users u2
-                    WHERE u1.user_id = :user_id AND u2.user_id = :following_id
-                )
-                INSERT INTO followers (user_id, following_id)
-                SELECT :user_id, :following_id
-                FROM valid_ids
-                WHERE NOT EXISTS( 
-                    SELECT 1 FROM followers WHERE user_id = :user_id AND following_id = :following_id
-                )
+                SELECT 1 
+                FROM users 
+                WHERE user_id = :user_id
                 """
+                ),
+            {"user_id": user_id}
+        ).scalar_one_or_none()
+        if not user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} does not exist."
+            )
+
+        target_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 
+                FROM users 
+                WHERE user_id = :following_id
+                """
+                ),
+            {"following_id": following.following_id}
+        ).scalar_one_or_none()
+        if not target_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {following.following_id} does not exist."
+            )
+
+        # Check for duplicate follow
+        already = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 
+                FROM followers 
+                WHERE user_id = :user_id AND following_id = :following_id
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id}
+        ).scalar_one_or_none()
+        if already:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User {user_id} is already following user {following.following_id}."
+            )
+
+        #safe to insert
+        connection.execute(
+            sqlalchemy.text(
+                "INSERT INTO followers (user_id, following_id) VALUES (:user_id, :following_id)"
             ),
             {"user_id": user_id, "following_id": following.following_id},
         )
-
-        if insert_result.rowcount < 1:
-            return {"message": "Invalid ids or attempting to enter duplicates"}
 
         connection.execute(
             sqlalchemy.text(
-                """
-                INSERT INTO follow_log (user_id, following_id, status)
-                VALUES (:user_id, :following_id, 'followed')
-                """
+                "INSERT INTO follow_log (user_id, following_id, status) VALUES (:user_id, :following_id, 'followed')"
             ),
             {"user_id": user_id, "following_id": following.following_id},
         )
 
+        # fetch usernames for the success message
         follower_username = connection.execute(
             sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
             {"user_id": user_id},
         ).scalar_one()
-
         following_username = connection.execute(
             sqlalchemy.text("SELECT username FROM users WHERE user_id = :following_id"),
             {"following_id": following.following_id},
         ).scalar_one()
 
     return {"message": f"{follower_username} started following {following_username}"}
+
 
 @router.post("/{user_id}/unfollow", status_code=status.HTTP_200_OK)
 def unfollow_user(user_id: int, following: FollowUserRequest):
