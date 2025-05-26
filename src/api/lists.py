@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 import sqlalchemy
 from src import database as db
 from src.api import auth
+from typing import List, Optional
 
 router = APIRouter(
     prefix="/lists",
@@ -10,12 +11,30 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+class ListStatusResponse(BaseModel):
+    meesage: str
+    username: str
+    set_id: int
+    status: str
+
 class ListStatusUpdate(BaseModel):
     status: str = Field(..., description="One of: wishlist, building, purchased, built")
 
+class FollowerActivityResponse(BaseModel):
+    follower_username: str
+    activity: List[dict]
+    reviews: List[dict]
+
+class SetDetailsResponse(BaseModel):
+    message: str
+    set_details: dict
+
+class ErrorResponse(BaseModel):
+    detail: str
+
 VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
 
-@router.put("/{user_id}/sets/{set_id}", status_code=status.HTTP_200_OK)
+@router.put("/{user_id}/sets/{set_id}", response_model=ListStatusResponse, status_code=status.HTTP_200_OK)
 def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     """
     Updates or inserts a user's status for a specific LEGO set. Valid statuses are: wishlist, building, purchased, built.
@@ -38,12 +57,15 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
 
         username = user.username
 
-
         # Check if the set exists
         set_exists = conn.execute(
-            sqlalchemy.text("""
-                SELECT 1 FROM sets WHERE id = :set_id
-            """),
+            sqlalchemy.text(
+                """
+                SELECT 1
+                FROM sets
+                WHERE id = :set_id
+                """
+            ),
             {"set_id": set_id}
         ).scalar_one_or_none()
 
@@ -53,55 +75,57 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
 
         # 2. Check if the list entry already exists
         existing = conn.execute(
-            sqlalchemy.text("""
-                SELECT list_id FROM lists
+            sqlalchemy.text(
+                """
+                SELECT list_id, status
+                FROM lists
                 WHERE user_id = :user_id AND set_id = :set_id
-            """),
+                """
+            ),
             {"user_id": user_id, "set_id": set_id}
         ).fetchone()
 
         if existing:
-            current_status = conn.execute(
-                sqlalchemy.text("""
-                    SELECT status FROM lists WHERE list_id = :list_id
-                """),
-                {"list_id": existing.list_id}
-            ).scalar_one()
+            current_status = existing.status
 
             if current_status == body.status:
-                return {
-                    "message": f"List entry for set {set_id} already has status '{body.status}'",
-                    "username": username,
-                    "set_id": set_id,
-                    "status": body.status
-                }
+                return ListStatusResponse(
+                    message=f"List entry for set {set_id} already has status '{body.status}'",
+                    username=username,
+                    set_id=set_id,
+                    status=body.status
+                )
 
             # Update existing status
             conn.execute(
-                sqlalchemy.text("""
+                sqlalchemy.text(
+                    """
                     UPDATE lists
                     SET status = :status
                     WHERE list_id = :list_id
-                """),
+                    """
+                ),
                 {"status": body.status, "list_id": existing.list_id}
             )
             action = "updated"
         else:
             # Insert new list entry
             conn.execute(
-                sqlalchemy.text("""
+                sqlalchemy.text(
+                    """
                     INSERT INTO lists (user_id, set_id, status)
                     VALUES (:user_id, :set_id, :status)
-                """),
+                    """
+                ),
                 {"user_id": user_id, "set_id": set_id, "status": body.status}
             )
             action = "created"
-    return {
-        "message": f"List entry for set {set_id} has been {action} with status '{body.status}'",
-        "username": username,
-        "set_id": set_id,
-        "status": body.status
-    }
+    return ListStatusResponse(
+        message=f"List entry for set {set_id} has been {action} with status '{body.status}'",
+        username=username,
+        set_id=set_id,
+        status=body.status
+    )
 
 # Example Flow 3 - Function 1
 @router.get("/{user_id}/progress", status_code=status.HTTP_200_OK)
