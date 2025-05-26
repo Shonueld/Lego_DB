@@ -16,8 +16,8 @@ router = APIRouter(
 
 class NewUser(BaseModel):
     username: str = Field(..., min_length=1)
-class Friend(BaseModel):
-    friend_id:int
+class FollowUserRequest(BaseModel):
+    following_id: int
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -50,36 +50,93 @@ def create_user(new_user: NewUser):
 
     return {"message": f"User '{new_user.username}' created successfully with id {user_id}"}
 
-@router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED)
-def add_friends(user_id: int, friend:Friend):
+@router.post("/{user_id}/follow", status_code=status.HTTP_201_CREATED)
+def follow_another_user(user_id: int, following: FollowUserRequest):
     with db.engine.begin() as connection:
-    
-        result = connection.execute(
+        insert_result = connection.execute(
             sqlalchemy.text(
                 """
                 WITH valid_ids AS (
                     SELECT 1
                     FROM users u1, users u2
-                    WHERE u1.user_id = :user_id AND u2.user_id = :friend_id
+                    WHERE u1.user_id = :user_id AND u2.user_id = :following_id
                 )
-                INSERT INTO friends (user_id, friend_id)
-                SELECT :user_id, :friend_id
+                INSERT INTO followers (user_id, following_id)
+                SELECT :user_id, :following_id
                 FROM valid_ids
                 WHERE NOT EXISTS( 
-                    SELECT 1 FROM friends WHERE user_id = :user_id AND friend_id = :friend_id
+                    SELECT 1 FROM followers WHERE user_id = :user_id AND following_id = :following_id
                 )
-                """),
-            {"user_id": user_id,
-             "friend_id": friend.friend_id },
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
         )
 
-        if result.rowcount < 1:
-                return {"message": "Invalid ids or attempting to enter duplicates"}
+        if insert_result.rowcount < 1:
+            return {"message": "Invalid ids or attempting to enter duplicates"}
 
-    return {"message": f"User:'{user_id}' added friend {friend.friend_id}"}
+        connection.execute(
+            sqlalchemy.text(
+                """
+                INSERT INTO follow_log (user_id, following_id, status)
+                VALUES (:user_id, :following_id, 'followed')
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
+        )
 
-@router.get("/{user_id}/friends", status_code=status.HTTP_200_OK)
-def get_friends(user_id: int):
+        follower_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id},
+        ).scalar_one()
+
+        following_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :following_id"),
+            {"following_id": following.following_id},
+        ).scalar_one()
+
+    return {"message": f"{follower_username} started following {following_username}"}
+
+@router.post("/{user_id}/unfollow", status_code=status.HTTP_200_OK)
+def unfollow_user(user_id: int, following: FollowUserRequest):
+    with db.engine.begin() as connection:
+        delete_result = connection.execute(
+            sqlalchemy.text(
+                """
+                DELETE FROM followers
+                WHERE user_id = :user_id AND following_id = :following_id
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
+        )
+
+        if delete_result.rowcount < 1:
+            raise HTTPException(status_code=400, detail="Follow relationship does not exist")
+
+        connection.execute(
+            sqlalchemy.text(
+                """
+                INSERT INTO follow_log (user_id, following_id, status)
+                VALUES (:user_id, :following_id, 'unfollowed')
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
+        )
+
+        follower_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id},
+        ).scalar_one()
+
+        following_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :following_id"),
+            {"following_id": following.following_id},
+        ).scalar_one()
+
+    return {"message": f"{follower_username} unfollowed {following_username}"}
+
+@router.get("/{user_id}/following-list", status_code=status.HTTP_200_OK)
+def get_following_users(user_id: int):
     with db.engine.begin() as connection:
         username = connection.execute(
             sqlalchemy.text(
@@ -95,20 +152,20 @@ def get_friends(user_id: int):
                 """
                 SELECT u.username
                 FROM users u
-                JOIN friends f ON f.friend_id = u.user_id
+                JOIN followers f ON f.following_id = u.user_id
                 WHERE f.user_id = :user_id
                 """),
             {"user_id": user_id,},).fetchall()
         
-        friends = [{"friend_username": row.username} for row in result]
+        following = [{"following_username": row.username} for row in result]
     
 
     if username:
-        return {"user": username, "friends": friends}
+        return {"user": username, "following": following}
     return{"user not found"}
 
-@router.get("/{user_id}/friends/{friend_id}/activity", status_code=status.HTTP_200_OK)
-def get_friends(user_id: int, friend_id:int ):
+@router.get("/{user_id}/activity/{following_id}", status_code=status.HTTP_200_OK)
+def get_user_activity_feed(user_id: int, following_id: int):
     with db.engine.begin() as connection:
 
 
@@ -118,43 +175,43 @@ def get_friends(user_id: int, friend_id:int ):
                 """
                 SELECT s.id, s.name, l.status, l.created_at, r.rating, r.description
                 FROM lists l
-                JOIN friends f ON f.friend_id = l.user_id
+                JOIN followers f ON f.following_id = l.user_id
                 JOIN sets s ON s.id = l.set_id
                 LEFT JOIN reviews r ON r.user_id = l.user_id AND r.set_id = s.id
                 WHERE 
                     f.user_id = :user_id AND 
-                    f.friend_id = :friend_id
+                    f.following_id = :following_id
                 ORDER BY l.created_at DESC
                 LIMIT 5
                 """),
-            {"user_id": user_id,"friend_id": friend_id},)
+            {"user_id": user_id,"following_id": following_id},)
         
         resultReviews = connection.execute(
             sqlalchemy.text(
                 """
                 SELECT s.id, s.name, r.rating, r.description, r.created_at
                 FROM reviews r
-                JOIN friends f ON f.friend_id = r.user_id
+                JOIN followers f ON f.following_id = r.user_id
                 JOIN sets s ON s.id = r.set_id
                 WHERE 
                     f.user_id = :user_id AND 
-                    f.friend_id = :friend_id
+                    f.following_id = :following_id
                 ORDER BY r.created_at DESC
                 LIMIT 5
                 
                 """),
-            {"user_id": user_id,"friend_id": friend_id},)
+            {"user_id": user_id,"following_id": following_id},)
 
-        friend_username = connection.execute(
+        following_username = connection.execute(
             sqlalchemy.text(
                 """
                 SELECT username
                 FROM users
-                WHERE user_id = :friend_id
-                """), {"friend_id": friend_id}).scalar_one_or_none()
+                WHERE user_id = :following_id
+                """), {"following_id": following_id}).scalar_one_or_none()
 
     if result.rowcount < 1:
-        return{"Not Friends"}
+        return{"Not Following"}
 
     activity = []
     reviews = []
@@ -183,5 +240,4 @@ def get_friends(user_id: int, friend_id:int ):
             reviews.append(review_entry)
             
 
-    return {"friend_username": friend_username, "activity": activity, "reviews": reviews} 
-
+    return {"following_username": following_username, "activity": activity, "reviews": reviews} 

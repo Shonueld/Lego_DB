@@ -13,7 +13,7 @@ Code Review Comments:
 6. for reviews of a set there should be some limitation to prevent spamming or some negative words that could be inappropriate.
 - Users are now limited to one review per set, and their review will get updated instead if they try to post a new review for a set they have already reviewed. 
 7. implement logging when creating users and adding friends so you have an easier way to see history
-- WILL ADRESS AFTER FOLLOWER CHANGE
+- Added a new follow_log to keep track
 8. add more detail to friends, there is no way to accept or decline it is just a one way decision
 - We ended up pivoting from friends to followers, as we felt one way behaviour made more sense
 9. /sets/ if max and min are switched this wouldn't make sense instead we can test for this special case or if max and min are equal
