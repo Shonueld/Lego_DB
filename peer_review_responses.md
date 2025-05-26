@@ -96,3 +96,14 @@ Rename them to distinguish them apart since this could potentially create confli
 13. API Endpoint for /sets/{set_id}/issues are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
 
+Lucas Pierce Comments:
+1. What is the point of /users/{user_id}/friends/{friend_id}/activity? Why not just have a get activity endpoint for users?
+
+2. /sets/ with no query parameters doesn’t return. At the very least put a limit, but even better paginate the results.
+
+3. /lists/{user_id}/sets/{set_id} gives internal server error when given some inputs.
+
+
+Some funky code (like running a count(*) where username to look for a name already existing). The peer reviews did a good job of catching major issues. You got some great peer review feedback (and some not good advice ). Please address all of it or call out why you don’t think it should be addressed individually. Overall, one of the better projects, you did a great job. If you address feedback by June 2nd AND send me a message, I will give you points back
+
+ 
