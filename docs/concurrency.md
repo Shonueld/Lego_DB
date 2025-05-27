@@ -7,13 +7,7 @@ Because Postgre uses MVCC, each individual query sees a consistent snapshot at t
 
 **Sequence Diagram:**
 
-```
-User A (Analytics)   Database             User B (List update)
-  |                     |                   |
-  |-- Run analytics query        |
-  |                     |-- Insert built row for set_id=42
-  |<-- Results don't include new row        |
-```
+![alt text](diagram1.png)
 
 **Phenomenon:**  
 Phantom Read — Would be possible if we re-queried inside the same transaction, but prevented here due to Postgres MVCC.
@@ -28,18 +22,11 @@ The `/users` endpoint checks if a username already exists before inserting a new
 
 If theres no database constraint, this may result in duplicate usernames. If a UNIQUE constraint is present, one of the inserts will fail, but the error will surface only after the application logic assumes the username is available.
 
-Sequence Diagram:
-User A (Create Peter)      Database              User B (Create Peter)
-      |                       |                        |
-      |-- Check if "Peter" exists -->                  |
-      |                       |<-- Not found           |
-      |<-- Not found          |                        |
-      |-- Insert "Peter" ----------------------------->|
-      |                       |-- Insert "Peter" (conflict or duplicate)
-      |                       |<-- Unique constraint error
-      |<-- Success            |<-- Error
+**Sequence Diagram:**
+
+![alt text](diagram2.png)
 
 **Phenomenon:**
 Lost Update and Write Skew — Both users read that the name Peter is available and try to create, but only one is able to actually make that user
 
-Solution: Ensure the username column has a UNIQUE constraint at the database level
+**Solution:** Ensure the username column has a UNIQUE constraint at the database level
