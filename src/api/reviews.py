@@ -49,7 +49,7 @@ def add_review(set_id: int, review: ReviewRequest):
         
         existing_review = connection.execute(
             sqlalchemy.text(
-                "SELECT review_id FROM reviews WHERE user_id = :user_id AND set_id = :set_id"
+                "SELECT review_id FROM reviews WHERE user_id = :user_id AND set_id = :set_id FOR UPDATE"
             ),
             {"user_id": review.user_id, "set_id": set_id}
         ).scalar_one_or_none()
