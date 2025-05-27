@@ -1,6 +1,41 @@
 # API Specifications
 __________________________
 
+# Complex Endpoints
+
+## 1. Get Most Popular Sets of the Month – /analytics/popular-sets (GET)
+
+Returns the top 10 most frequently built sets for a given month and year. Useful for seeing which sets are trending among builders.
+
+Query Parameters (required):
+	•	month (integer 1–12)
+	•	year (integer, e.g., 2025)
+
+Response:
+[
+  {
+    "set_id": 123,
+    "name": "Millennium Falcon",
+    "built_count": 42
+  },
+  ...
+]
+
+## 2. Get Top Build Streaks – /analytics/build-streaks (GET)
+
+Returns the users with the longest streaks of consecutive weeks where they marked a set as “built". Basically a list of the most dedicated builders.
+
+Response:
+
+[
+  {
+    "user_id": 1,
+    "username": "Lucas Pierce",
+    "streak_weeks": 50
+  },
+  ...
+]
+
 ## 1. Get Lego Set Catalog – /sets/ (GET)
 Retrieves a list of Lego sets with optional filters like theme, price range, piece count, or age range.
 
