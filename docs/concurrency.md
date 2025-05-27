@@ -30,3 +30,35 @@ If theres no database constraint, this may result in duplicate usernames. If a U
 Lost Update and Write Skew — Both users read that the name Peter is available and try to create, but only one is able to actually make that user
 
 **Solution:** Ensure the username column has a UNIQUE constraint at the database level
+
+3. Lost Update in /sets/{sets_id}/reviews 
+
+**Scenario:**
+The POST /sets/{set_id}/reviews endpoint first checks whether a review already exists for the given (user_id, set_id). If no review is found, it inserts a new row; otherwise, it issues an UPDATE to modify the existing review. Now imagine two brothers sharing the same account (user_id=7) both load the “edit review” form for set_id=42 at almost the same time:
+
+- Brother A retrieves the current review (rating=3, description="Pretty good").
+
+- Brother B—having loaded the form in a separate browser or device—also sees the same original review.
+
+- Brother A submits an update to rating=4, description="Great set!" and commits.
+
+- Almost immediately, Brother B submits rating=5, description="Amazing build!". Because his code still believes no intervening change happened, his UPDATE overwrites Brother A’s change.
+
+
+**Sequence Diagram:**
+
+![alt text](diagram3.png)
+
+**Phenomenon:**
+Lost Update — under READ COMMITTED, both transactions read the same initial state and blindly apply their own writes, causing the later one to overwrite the earlier without detection.
+
+**Solution:**
+We can either use the following isolation or locking strategies:
+1. Pessimistic Locking (SELECT … FOR UPDATE):
+Lock the review row when reading it so that the second transaction blocks until the first commits.
+
+2. Optimistic Locking:
+Add a version integer to reviews, include it in our  UPDATE’s WHERE, and increment it on each write. If the version no longer matches, reject the update.
+
+3.  Serializable Isolation Level:
+Run the entire transaction under SERIALIZABLE. PostgreSQL will see the write–write conflict and abort one transaction with a serialization error, which our application can catch and retry.
