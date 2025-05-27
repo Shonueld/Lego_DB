@@ -15,10 +15,10 @@ Phantom Read — Would be possible if we re-queried inside the same transaction,
 **Solution:**  
 No changes needed. The use of a single read query ensures a consistent snapshot.
 
-2. Race Condition When Creating Users with Duplicate Usernames
+## 2. Race Condition When Creating Users with Duplicate Usernames
 
 **Scenario:**
-The `/users` endpoint checks if a username already exists before inserting a new user. If two users attempt to create an account with the same username like "Peter Griffin" at nearly the same time, both may pass the existence check before either inserts, resulting in a race condition.
+The `/users` endpoint checks if a username already exists before inserting a new user. If two users attempt to create an account with the same username like "Peter" at nearly the same time, both may pass the existence check before either inserts, resulting in a race condition.
 
 If theres no database constraint, this may result in duplicate usernames. If a UNIQUE constraint is present, one of the inserts will fail, but the error will surface only after the application logic assumes the username is available.
 
