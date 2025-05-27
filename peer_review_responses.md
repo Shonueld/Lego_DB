@@ -33,7 +33,7 @@ Code Review Comments:
 - Table added to log and see which user is following who.
 
 3. On @router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED), where it returns {"message": "Invalid ids or attempting to enter duplicates"}, it could be more clear as to whether it is because of invalid ids or attempting to enter duplicates.
-- 
+- Added two error messages: one to indicate if a user is already following another user, and another if the user being followed does not exist.
 
 4. user_id is fetched multiple times, a abstract helper function can help reduce repetition
 5. In sets.py and other files where a dictionary is being returned, response models can be used for clarity.
