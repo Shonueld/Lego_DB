@@ -76,13 +76,22 @@ API Design Comments:
 {
 "message": "Invalid ids or attempting to enter duplicates"
 }
+    **Endpoint No longer Used**
 2. /sets/ wont give me anything if I don't use the filters but in description says optional
+    **Works as intended for me? more testing needed**
 3. add feature to block friend request, maybe there is someone who you don't want to be associated with
+    **Added /users/{user_id}/block and unblock**
 4. add feature to report user for misconduct such as bad comments being posted
+    **in progres, just need to update schema with new tables and add unblock logic**
 5. something that lists suggested friends because otherwise how would you know what their id is
+    **Great suggestion, can display users that 1. have alot of followers 2. have alot of sets in list 3. suggest friends based on user list similarity**
 6. add some sort of leaderboard feature so that there is a community aspect
+    **Can add different criterias based on amount reviewed, most completed, followers etc**
 7. I think it would be cool to add not only other users as friends but groups so people with similar interests, locations, or projects can talk and be in a sub group
+    **Great idea, however communication between friends is not supported, this can be accounted for when creating suggested friends to help create link friends of friends together and establish groups in a sense**
+
 8. I feel like adding a time stamp to when the friendship was created could be nice for tracking and also a fun leaderboard later for longest friendships
+
 9. Also a timestamp on when the issues were published would be good because if it gets resolved a time stamp would help a user figure out when it was reported and if that is an old or new issue
 10. for the review I think it would be good to add the user id of the person who submitted it, this information wouldn't be shared but it would be stored in case something bad is posted or someone is spamming then you know who is the problem
 11. maybe some sort of feature where friends could collaborate on a lego project, so some way to add multiple people to project

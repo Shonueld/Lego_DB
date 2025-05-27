@@ -18,6 +18,8 @@ class NewUser(BaseModel):
     username: str = Field(..., min_length=1)
 class FollowUserRequest(BaseModel):
     following_id: int
+class UserId(BaseModel):
+    user_id: int
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -276,3 +278,127 @@ def get_user_activity_feed(user_id: int, following_id: int):
             
 
     return {"following_username": following_username, "activity": activity, "reviews": reviews} 
+
+
+
+@router.post("/{user_id}/block", status_code=status.HTTP_201_CREATED)
+def block_another_user(user_id: int, target: UserId):
+    with db.engine.begin() as connection:
+        # Verify both users exist
+        user_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 
+                FROM users 
+                WHERE user_id = :user_id
+                """
+                ),
+            {"user_id": user_id}
+        ).scalar_one_or_none()
+        if not user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} does not exist."
+            )
+
+        target_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 
+                FROM users 
+                WHERE user_id = :target_id
+                """
+                ),
+            {"target_id": target.user_id}
+        ).scalar_one_or_none()
+        if not target_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {target.user_id} does not exist."
+            )
+
+        # Check for duplicate block
+        already = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 
+                FROM blocks 
+                WHERE user_id = :user_id AND blocked_id = :blocked_id
+                """
+            ),
+            {"user_id": user_id, "blocked_id": target.user_id}
+        ).scalar_one_or_none()
+        if already:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User {user_id} has already blocked user {target.user_id}."
+            )
+
+        #safe to insert
+        connection.execute(
+            sqlalchemy.text(
+                "INSERT INTO blocks (user_id, blocked_id) VALUES (:user_id, :target_id)"
+            ),
+            {"user_id": user_id, "target_id": target.user_id},
+        )
+
+        connection.execute(
+            sqlalchemy.text(
+                "INSERT INTO block_log (user_id, blocked_id, status) VALUES (:user_id, :target_id, 'blocked')"
+            ),
+            {"user_id": user_id, "target_id": target.user_id},
+        )
+
+        # fetch usernames for the success message
+        user = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id},
+        ).scalar_one()
+        blocked_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :blocked_id"),
+            {"blocked_id": target.user_id},
+        ).scalar_one()
+
+    return {"message": f"{user} has blocked {blocked_username}"}
+
+
+@router.post("/{user_id}/unblock", status_code=status.HTTP_200_OK)
+def unfollow_user(user_id: int, following: FollowUserRequest):
+    with db.engine.begin() as connection:
+        delete_result = connection.execute(
+            sqlalchemy.text(
+                """
+                DELETE FROM followers
+                WHERE user_id = :user_id AND following_id = :following_id
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
+        )
+
+        if delete_result.rowcount < 1:
+            raise HTTPException(status_code=400, detail="Follow relationship does not exist")
+
+        connection.execute(
+            sqlalchemy.text(
+                """
+                INSERT INTO follow_log (user_id, following_id, status)
+                VALUES (:user_id, :following_id, 'unfollowed')
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id},
+        )
+
+        follower_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :user_id"),
+            {"user_id": user_id},
+        ).scalar_one()
+
+        following_username = connection.execute(
+            sqlalchemy.text("SELECT username FROM users WHERE user_id = :following_id"),
+            {"following_id": following.following_id},
+        ).scalar_one()
+
+    return {"message": f"{follower_username} unfollowed {following_username}"}
+
+
+
