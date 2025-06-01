@@ -49,6 +49,8 @@ Code Review Comments:
 1. Under the endpoint users/{user_id}/friends/{friend_id}/activity
 Error in logic where if the friend has no activity, it returns "Not Friends" even if they are friends
 This is at line 156 of users.py
+- Edited the endpoint to add an error that returns a separate error if the requested user has no activity
+- Endpoint no longer returns "Not Following" when there is no activity available
 2. Under the endpoint lists/{user_id}/progress there is a redudant Order By Query
 The comment on line 103 of lists.py specifies its meant to group by the status, which is great if we are meant to be viewing this query.
 However, it immediately sorts the results queried into a dictionary meaning the order by isn't neccessary.

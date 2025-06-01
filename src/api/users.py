@@ -229,32 +229,28 @@ def get_user_activity_feed(user_id: int, following_id: int):
                 """
                 SELECT s.id, s.name, l.status, l.created_at
                 FROM lists l
-                JOIN followers f ON f.following_id = l.user_id
                 JOIN sets s ON s.id = l.set_id
-                LEFT JOIN reviews r ON r.user_id = l.user_id AND r.set_id = s.id
-                WHERE 
-                    f.user_id = :user_id AND 
-                    f.following_id = :following_id
+                WHERE l.user_id = :following_id
                 ORDER BY l.created_at DESC
                 LIMIT 5
-                """),
-            {"user_id": user_id,"following_id": following_id},)
+                """
+            ),
+            {"following_id": following_id}
+        ).fetchall()
         
-        resultReviews = connection.execute(
+        result_reviews = connection.execute(
             sqlalchemy.text(
                 """
                 SELECT s.id, s.name, r.rating, r.description, r.created_at
                 FROM reviews r
-                JOIN followers f ON f.following_id = r.user_id
                 JOIN sets s ON s.id = r.set_id
-                WHERE 
-                    f.user_id = :user_id AND 
-                    f.following_id = :following_id
+                WHERE r.user_id = :following_id
                 ORDER BY r.created_at DESC
                 LIMIT 5
-                
-                """),
-            {"user_id": user_id,"following_id": following_id},)
+                """
+            ),
+            {"following_id": following_id}
+        ).fetchall()
 
         following_username = connection.execute(
             sqlalchemy.text(
@@ -262,36 +258,37 @@ def get_user_activity_feed(user_id: int, following_id: int):
                 SELECT username
                 FROM users
                 WHERE user_id = :following_id
-                """), {"following_id": following_id}).scalar_one_or_none()
+                """
+            ),
+            {"following_id": following_id}
+        ).scalar_one_or_none()
 
-    if result.rowcount < 1:
-        return{"Not Following"}
+    if not result and not result_reviews:
+        return{"message": f"No activity found for user '{following_username}'"}
 
-    activity = []
-    reviews = []
-
-    for row in result:
-        entry = {
+    activity = [
+        {
             "set_id": row.id,
             "set_name": row.name,
             "status": row.status,
             "created_at": row.created_at
         }
+        for row in result
+    ]
 
-        activity.append(entry)
-
-    for row in resultReviews:
-        entry = {
+    reviews = [
+        {
             "set_id": row.id,
             "set_name": row.name,
+            "rating": row.rating,
+            "description": row.description,
             "created_at": row.created_at
         }
+        for row in result_reviews
+    ]
 
-        if row.rating is not None:
-            review_entry = entry.copy()
-            review_entry["rating"] = row.rating
-            review_entry["description"] = row.description
-            reviews.append(review_entry)
-            
-
-    return {"following_username": following_username, "activity": activity, "reviews": reviews} 
+    return {
+        "following_username": following_username,
+        "activity": activity,
+        "reviews": reviews
+    } 
