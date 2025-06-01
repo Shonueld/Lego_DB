@@ -67,15 +67,17 @@ Maybe implement a method of confirming friendship, or not counting as friends un
 7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise error message.
 - Added error checking to get_following function make it less ambiguous as to the reason for error
 8. This is a continuation of issue #7 as it returns a dictionary response when it should properly return an HTTPException to exit the code.
+- Added furthing error checking in get_user_activity_feed function to remove all dictionary responses
 9. lines 50-60 on lists.py are updating the status. However, if the updated status is the same as the previous status, it still returns the message "updated" even though no change occured.
 -   update_list_status function now checks to see if the new status is the same as the previous one
 -   It alters the message to say "List entry for set {set_id} already has status '{body.status}'"
 10. Continuation of Issue 1
 Not entirely sure why this is happening, but even if there is activity it just returns "Not Friends"
+- Fixed through the fix for issue 1
 11. Overall using dicts to return data instead of using Pydantic models. This is fine but Pydantic models allows for better control and modifying of the code in the future.
 -   In progress
 12. When trying to update the status of a set that doesn't exist, there isn't a catch for that, meaning it returns an Internal Server Error.
--   
+-   There already exists error checking for when a set doesn't exist in the update_list_status function.
 
 API Design Comments:
 

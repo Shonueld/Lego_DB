@@ -16,10 +16,10 @@ router = APIRouter(
 
 class NewUser(BaseModel):
     username: str = Field(..., min_length=1)
-class FollowUserRequest(BaseModel):
-    following_id: int
 class UserId(BaseModel):
     user_id: int
+class FollowUserRequest(BaseModel):
+    following_id: int
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -320,7 +320,10 @@ def get_user_activity_feed(user_id: int, following_id: int):
         ).scalar_one_or_none()
 
     if not result and not result_reviews:
-        return{"message": f"No activity found for user '{following_username}'"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No activity found for user '{following_username}'"
+        )
 
     activity = [
         {
