@@ -204,13 +204,30 @@ def get_following_users(user_id: int):
 @router.get("/{user_id}/activity/{following_id}", status_code=status.HTTP_200_OK)
 def get_user_activity_feed(user_id: int, following_id: int):
     with db.engine.begin() as connection:
+        is_following = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1
+                FROM followers
+                WHERE user_id = :user_id AND following_id = :following_id
+                """
+            ),
+            {
+                "user_id": user_id,
+                "following_id": following_id
+            }
+        ).scalar_one_or_none()
 
-
+        if not is_following:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User {user_id} is not following user {following_id}."
+            )
 
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT s.id, s.name, l.status, l.created_at, r.rating, r.description
+                SELECT s.id, s.name, l.status, l.created_at
                 FROM lists l
                 JOIN followers f ON f.following_id = l.user_id
                 JOIN sets s ON s.id = l.set_id

@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 class ListStatusResponse(BaseModel):
-    meesage: str
+    message: str
     username: str
     set_id: int
     status: str
@@ -46,9 +46,13 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     with db.engine.begin() as conn:
         # 1. Get the username
         user = conn.execute(
-            sqlalchemy.text("""
-                SELECT username FROM users WHERE user_id = :user_id
-            """),
+            sqlalchemy.text(
+                """
+                SELECT username
+                FROM users
+                WHERE user_id = :user_id
+                """
+                ),
             {"user_id": user_id}
         ).fetchone()
 
