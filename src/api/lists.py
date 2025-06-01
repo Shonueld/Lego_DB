@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 import sqlalchemy
 from src import database as db
 from src.api import auth
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 router = APIRouter(
     prefix="/lists",
@@ -31,6 +31,14 @@ class SetDetailsResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+class ProgressStatus(BaseModel):
+    count: int
+    sets: List[str]
+
+class ListProgressResponse(BaseModel):
+    message: str
+    progress: Dict[str, ProgressStatus]
 
 VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
 
@@ -132,7 +140,7 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     )
 
 # Example Flow 3 - Function 1
-@router.get("/{user_id}/progress", status_code=status.HTTP_200_OK)
+@router.get("/{user_id}/progress", response_model=ListProgressResponse, status_code=status.HTTP_200_OK)
 def get_list_progress(user_id: int):
     """
     Displays a user's progress for their entire list.
@@ -176,7 +184,7 @@ def get_list_progress(user_id: int):
             progress[row.status]["count"] += 1
             progress[row.status]["sets"].append(row.set_name)
 
-    return {
-        "message": f"Displayed progress for user {username}",
-        "progress": progress
-    }
+    return ListProgressResponse(
+        message=f"Displayed progress for user {username}",
+        progress=progress
+    )

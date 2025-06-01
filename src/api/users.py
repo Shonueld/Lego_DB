@@ -16,13 +16,40 @@ router = APIRouter(
 
 class NewUser(BaseModel):
     username: str = Field(..., min_length=1)
+
 class UserId(BaseModel):
     user_id: int
+
 class FollowUserRequest(BaseModel):
     following_id: int
 
+class UserCreatedResponse(BaseModel):
+    message: str
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+class FollowActionResponse(BaseModel):
+    message: str
+
+class FollowingUser(BaseModel):
+    following_username: str
+
+class FollowingListResponse(BaseModel):
+    user: str
+    following: List[FollowingUser]
+
+class ActivityItem(BaseModel):
+    set_id: int
+    set_name: str
+    status: Optional[str] = None
+    created_at: Optional[str] = None
+    rating: Optional[int] = None
+    description: Optional[str] = None
+
+class UserActivityFeedResponse(BaseModel):
+    following_username: str
+    activity: List[ActivityItem]
+    reviews: List[ActivityItem]
+
+@router.post("/", response_model=UserCreatedResponse, status_code=status.HTTP_201_CREATED)
 def create_user(new_user: NewUser):
     with db.engine.begin() as connection:
     
@@ -50,10 +77,9 @@ def create_user(new_user: NewUser):
             {"username": new_user.username},
         ).scalar_one()
 
-    return {"message": f"User '{new_user.username}' created successfully with id {user_id}"}
+    return UserCreatedResponse(message=f"User '{new_user.username}' created successfully with id {user_id}")
 
-
-@router.post("/{user_id}/follow", status_code=status.HTTP_201_CREATED)
+@router.post("/{user_id}/follow", response_model=FollowActionResponse, status_code=status.HTTP_201_CREATED)
 def follow_another_user(user_id: int, following: FollowUserRequest):
     with db.engine.begin() as connection:
         # Verify both users exist
@@ -136,10 +162,9 @@ def follow_another_user(user_id: int, following: FollowUserRequest):
             {"following_id": following.following_id},
         ).scalar_one()
 
-    return {"message": f"{follower_username} started following {following_username}"}
+    return FollowActionResponse(message=f"{follower_username} started following {following_username}")
 
-
-@router.post("/{user_id}/unfollow", status_code=status.HTTP_200_OK)
+@router.post("/{user_id}/unfollow", response_model=FollowActionResponse, status_code=status.HTTP_200_OK)
 def unfollow_user(user_id: int, following: FollowUserRequest):
     with db.engine.begin() as connection:
         user_exists = connection.execute(
@@ -221,9 +246,9 @@ def unfollow_user(user_id: int, following: FollowUserRequest):
             {"following_id": following.following_id},
         ).scalar_one()
 
-    return {"message": f"{follower_username} unfollowed {following_username}"}
+    return FollowActionResponse(message=f"{follower_username} unfollowed {following_username}")
 
-@router.get("/{user_id}/following-list", status_code=status.HTTP_200_OK)
+@router.get("/{user_id}/following-list", response_model=FollowingListResponse, status_code=status.HTTP_200_OK)
 def get_following_users(user_id: int):
     with db.engine.begin() as connection:
         username = connection.execute(
@@ -252,12 +277,9 @@ def get_following_users(user_id: int):
     if not username:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     
-    return{
-        "user": username,
-        "following": following
-    }
+    return FollowingListResponse(user=username, following=following)
 
-@router.get("/{user_id}/activity/{following_id}", status_code=status.HTTP_200_OK)
+@router.get("/{user_id}/activity/{following_id}", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
 def get_user_activity_feed(user_id: int, following_id: int):
     with db.engine.begin() as connection:
         is_following = connection.execute(
@@ -346,8 +368,8 @@ def get_user_activity_feed(user_id: int, following_id: int):
         for row in result_reviews
     ]
 
-    return {
-        "following_username": following_username,
-        "activity": activity,
-        "reviews": reviews
-    } 
+    return UserActivityFeedResponse(
+        following_username=following_username,
+        activity=activity,
+        reviews=reviews
+    )

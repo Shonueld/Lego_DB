@@ -42,8 +42,8 @@ def get_most_popular_sets(month: int = Query(..., ge=1, le=12), year: int = Quer
             {"month": month, "year": year}
         )
         sets = result.fetchall()
-    return [dict(row._mapping) for row in sets]
-
+    
+    return [PopularSet(**dict(row._mapping)) for row in sets]
 # Get users with the longest build streaks (at least one built status per week)
 @router.get("/build-streaks", response_model=List[StreakUser])
 def get_top_build_streaks():
@@ -81,4 +81,5 @@ def get_top_build_streaks():
             """)
         )
         users = result.fetchall()
-    return [dict(row._mapping) for row in users]
+    
+    return [StreakUser(**dict(row._mapping)) for row in users]

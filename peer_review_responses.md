@@ -75,7 +75,7 @@ Maybe implement a method of confirming friendship, or not counting as friends un
 Not entirely sure why this is happening, but even if there is activity it just returns "Not Friends"
 - Fixed through the fix for issue 1
 11. Overall using dicts to return data instead of using Pydantic models. This is fine but Pydantic models allows for better control and modifying of the code in the future.
--   In progress
+-   Replaced all dictionaries in ending return statements with Pydantic models for all API endpoints
 12. When trying to update the status of a set that doesn't exist, there isn't a catch for that, meaning it returns an Internal Server Error.
 -   There already exists error checking for when a set doesn't exist in the update_list_status function.
 

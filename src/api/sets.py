@@ -13,7 +13,6 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
-
 class Set(BaseModel):
     id: int
     set_number: str
@@ -22,8 +21,15 @@ class Set(BaseModel):
     number_of_parts: int
     theme_name: str
 
+class SetDetailsResponse(BaseModel):
+    message: str
+    set_details: Set
 
-@router.get("/{set_id}", status_code=status.HTTP_200_OK)
+class SetsListResponse(BaseModel):
+    message: str
+    sets: List[Set]
+
+@router.get("/{set_id}", response_model=SetDetailsResponse, status_code=status.HTTP_200_OK)
 def get_set(set_id: int):
     """
     Retrieves details for a specific set by ID
@@ -44,6 +50,7 @@ def get_set(set_id: int):
         
         set_details = dict(result._mapping)
 
-    return {"message": f"Displays details for set {set_id}",
-            "set_details": set_details 
-    }
+    return SetDetailsResponse(
+        message=f"Displays details for set {set_id}",
+        set_details=set_details
+    )

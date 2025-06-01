@@ -4,7 +4,7 @@ from src import database as db
 import sqlalchemy
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 router = APIRouter(
     prefix="/sets",
@@ -17,14 +17,22 @@ class ReviewRequest(BaseModel):
     description: str
 
 class ReviewResponse(BaseModel):
-    review_id: int
+    review_id: Optional[int] = None
     set_id: int
     user_id: int
     rating: int
     description: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
 
-@router.post("/{set_id}/reviews",status_code=status.HTTP_201_CREATED)
+class ReviewMessageResponse(BaseModel):
+    message: str
+    data: ReviewResponse
+
+class AverageRatingResponse(BaseModel):
+    set_id: int
+    average_rating: float
+
+@router.post("/{set_id}/reviews", response_model=ReviewMessageResponse, status_code=status.HTTP_201_CREATED)
 def add_review(set_id: int, review: ReviewRequest):
     """
     Add a review for a specific Lego set.
@@ -88,17 +96,16 @@ def add_review(set_id: int, review: ReviewRequest):
             )
             message = "Review successfully added."
     
-    return {
-        "message": message,
-        "data": {
-            "set_id": set_id,
-            "user_id": review.user_id,
-            "rating": review.rating,
-            "description": review.description
-        }
-    }
+    return ReviewMessageResponse(
+        message=message,
+        data=ReviewResponse(
+            set_id=set_id,
+            user_id=review.user_id,
+            rating=review.rating,
+            description=review.description)
+    )
 
-@router.get("/{set_id}/reviews/average")
+@router.get("/{set_id}/reviews/average", response_model=AverageRatingResponse)
 def get_average_rating(set_id: int):
     """
     Get the average rating for a set.
@@ -118,7 +125,7 @@ def get_average_rating(set_id: int):
     if result is None:
         raise HTTPException(status_code=404, detail="No reviews found for this set")
 
-    return {"set_id": set_id, "average_rating": round(result, 2)}
+    return AverageRatingResponse(set_id=set_id, average_rating=round(result, 2))
 
 @router.get("/{set_id}/reviews", response_model=List[ReviewResponse])
 def get_all_reviews(
@@ -148,4 +155,4 @@ def get_all_reviews(
             {"set_id": set_id}
         ).fetchall()
 
-    return [dict(row._mapping) for row in result]
+    return [ReviewResponse(**dict(row._mapping)) for row in result]

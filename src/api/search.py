@@ -3,6 +3,7 @@ from typing import Optional, List
 import sqlalchemy
 from src import database as db
 from src.api import auth
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/sets",
@@ -10,7 +11,18 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
-@router.get("/", summary="Search LEGO sets with optional filters")
+class SetSearchResult(BaseModel):
+    id: int
+    set_number: str
+    name: str
+    year_released: int
+    number_of_parts: int
+    theme_name: str
+
+class SetSearchListResponse(BaseModel):
+    results: list[SetSearchResult]
+
+@router.get("/", summary="Search LEGO sets with optional filters", response_model=SetSearchListResponse)
 def search_sets(
     min_pieces: Optional[int] = Query(None, description="Minimum number of pieces"),
     max_pieces: Optional[int] = Query(None, description="Maximum number of pieces"),
@@ -64,4 +76,6 @@ def search_sets(
         result = connection.execute(sqlalchemy.text(query), params)
         sets = result.fetchall()
 
-    return [dict(row._mapping) for row in sets]
+    return SetSearchListResponse(
+        results=[SetSearchResult(**dict(row._mapping)) for row in sets]
+    )

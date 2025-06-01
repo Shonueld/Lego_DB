@@ -25,7 +25,11 @@ class IssueRequest(BaseModel):
     user_id: int
     message: str = Field(..., min_length=1, description="Issue description must not be empty.")
 
-@router.post("/sets/{set_id}/issues", status_code=status.HTTP_201_CREATED)
+class IssueMessageResponse(BaseModel):
+    message: str
+    data: IssueResponse
+
+@router.post("/sets/{set_id}/issues", response_model=IssueMessageResponse, status_code=status.HTTP_201_CREATED)
 def post_issue(set_id: int, issue: IssueRequest):
     """
     Adds an issue for a specific Lego set.
@@ -72,17 +76,16 @@ def post_issue(set_id: int, issue: IssueRequest):
             }
         ).fetchone()
 
-    return {
-        "message": "Issue successfully reported.",
-        "data": {
-            "issue_id": result.issue_id,
-            "set_id": set_id,
-            "user_id": issue.user_id,
-            "username": user_row.username,
-            "description": issue.message,
-            "created_at": result.created_at
-        }
-    }
+    return IssueMessageResponse(
+        message="Issue successfully reported.",
+        data=IssueResponse(
+            issue_id=result.issue_id,
+            set_id=set_id,
+            username=user_row.username,
+            description=issue.message,
+            created_at=result.created_at
+        )
+    )
 
 @router.get("/sets/{set_id}/issues", response_model=List[IssueResponse])
 def get_issues_for_set(set_id: int, limit: int = Query(50, ge=1), offset: int = Query(0, ge=0)):
@@ -105,4 +108,13 @@ def get_issues_for_set(set_id: int, limit: int = Query(50, ge=1), offset: int = 
         )
         issues = result.fetchall()
 
-    return [dict(row._mapping) for row in issues]
+    return [
+        IssueResponse(
+            issue_id=row.issue_id,
+            set_id=row.set_id,
+            username=row.username,
+            description=row.description,
+            created_at=row.created_at
+        )
+        for row in issues
+    ]
