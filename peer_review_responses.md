@@ -85,40 +85,55 @@ API Design Comments:
 {
 "message": "Invalid ids or attempting to enter duplicates"
 }
-    **Endpoint No longer Used**
+- Endpoint No longer Used**
 2. /sets/ wont give me anything if I don't use the filters but in description says optional
-    **Works as intended for me? more testing needed**
+- Works as intended for me? more testing needed**
 3. add feature to block friend request, maybe there is someone who you don't want to be associated with
-    **Added /users/{user_id}/block and unblock**
+- Added /users/{user_id}/block and unblock**
 4. add feature to report user for misconduct such as bad comments being posted
-    **in progres, just need to update schema with new tables and add unblock logic**
+- in progres, just need to update schema with new tables and add unblock logic**
 5. something that lists suggested friends because otherwise how would you know what their id is
-    **Great suggestion, can display users that 1. have alot of followers 2. have alot of sets in list 3. suggest friends based on user list similarity**
+- Great suggestion, can display users that 1. have alot of followers 2. have alot of sets in list 3. suggest friends based on user list similarity**
 6. add some sort of leaderboard feature so that there is a community aspect
-    **Can add different criterias based on amount reviewed, most completed, followers etc**
+- Can add different criterias based on amount reviewed, most completed, followers etc**
 7. I think it would be cool to add not only other users as friends but groups so people with similar interests, locations, or projects can talk and be in a sub group
-    **Great idea, however communication between friends is not supported, this can be accounted for when creating suggested friends to help create link friends of friends together and establish groups in a sense**
+- Great idea, however communication between friends is not supported, this can be accounted for when creating suggested friends to help create link friends of friends together and establish groups in a sense**
 
 8. I feel like adding a time stamp to when the friendship was created could be nice for tracking and also a fun leaderboard later for longest friendships
-
+- feels a bit unecessary to make a leaderboard however adding a timestamp seems like a good idea
 9. Also a timestamp on when the issues were published would be good because if it gets resolved a time stamp would help a user figure out when it was reported and if that is an old or new issue
+- Great suggestion
 10. for the review I think it would be good to add the user id of the person who submitted it, this information wouldn't be shared but it would be stored in case something bad is posted or someone is spamming then you know who is the problem
+- Great suggestion
 11. maybe some sort of feature where friends could collaborate on a lego project, so some way to add multiple people to project
+- It would be smoother to have them seperate, details about the build could always go in the review
 12. not sure if it would be helpful to make the id labels more specific so if you are doing quarries and joining tables it is easier for readability.
+- not a bad suggestion, could always just lable the table then do table_name.id
 
 1. For user_id and friend_id, the use of unique when creating the alembic table can be used to prevent duplicates.
+- could add that, pretty sure we already check for duplicates though
 2. On lists.py, the lists.status column accepts arbitrary strings. ENUM can be used so that only {"wishlist", "purchased", "building", "built"} are accepted.
+- great suggestion
 3. For reviews and list entries, an updated_at timestamp can make tracking entries easier.
+- already mentioned, good idea
 4. post_issue() returns both user_id and username, which can be redundant.
+- I think its good to return both, knowing user_id is useful if you want to continuously test  endpoints, same goes with username
 5. The review structure in friend activity is inconsistent with the review structure in reviews.
+- not sure what this means
 6. The ability to delete users, friends, sets from lists, and reviews should be implemented.
+- great idea
 7. A primary key id for the friends table can help with management and tracking.
+- primary key would be unecessary, it uses a composite key which can do the same thing
 8. For status and username, it should not be allowed to be NULL.
+- good idea
 9. Username should have a character limit just so that the data is more consistent.
+- great idea
 10. Users should only be able to leave one review per set, so a unique constraint should be implemented.
+- I believe users could review a set multiple times, however a limit could get added maybe 3-5. Or maybe limit to only 1 review and that review can get edited later
 11. For lists, users should also only be able to have one entry per set so a unique constraint should also be added.
+- previously mentioned
 12. CHECK constraints for reviews.rating can be implemented in the database columns even though it may be added in reviews.py
-
+- not sure what this means
 1. API Endpoint /sets is very slow and returns too many results.
 Perhaps limit the return results.
 - Limited results to 50 by default and added an option to choose how many to return, now paginates results
