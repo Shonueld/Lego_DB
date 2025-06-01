@@ -142,6 +142,55 @@ def follow_another_user(user_id: int, following: FollowUserRequest):
 @router.post("/{user_id}/unfollow", status_code=status.HTTP_200_OK)
 def unfollow_user(user_id: int, following: FollowUserRequest):
     with db.engine.begin() as connection:
+        user_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 FROM users WHERE user_id = :user_id
+                """
+            ),
+            {"user_id": user_id}
+        ).scalar_one_or_none()
+
+        if not user_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {user_id} does not exist."
+            )
+        
+        target_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 FROM users WHERE user_id = :following_id
+                """
+            ),
+            {"following_id": following.following_id}
+        ).scalar_one_or_none()
+
+        if not target_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with id {following.following_id} does not exist."
+            )
+        
+        if user_id == following.following_id:
+            raise HTTPException(status_code=400, detail="Cannot unfollow yourself")
+        
+        relationship_exists = connection.execute(
+            sqlalchemy.text(
+                """
+                SELECT 1 FROM followers
+                WHERE user_id = :user_id AND following_id = :following_id
+                """
+            ),
+            {"user_id": user_id, "following_id": following.following_id}
+        ).scalar_one_or_none()
+        
+        if not relationship_exists:
+            raise HTTPException(
+                status_code=400,
+                detail="Follow relationship does not exist"
+            )
+
         delete_result = connection.execute(
             sqlalchemy.text(
                 """
@@ -151,9 +200,6 @@ def unfollow_user(user_id: int, following: FollowUserRequest):
             ),
             {"user_id": user_id, "following_id": following.following_id},
         )
-
-        if delete_result.rowcount < 1:
-            raise HTTPException(status_code=400, detail="Follow relationship does not exist")
 
         connection.execute(
             sqlalchemy.text(
@@ -187,7 +233,9 @@ def get_following_users(user_id: int):
                 FROM users
                 where user_id = :user_id
                 """
-            ), {"user_id": user_id}).scalar_one_or_none()
+            ),
+            {"user_id": user_id}
+        ).scalar_one_or_none()
         
         result = connection.execute(
             sqlalchemy.text(

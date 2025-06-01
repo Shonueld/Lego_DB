@@ -63,7 +63,9 @@ Maybe implement a method of confirming friendship, or not counting as friends un
 5. line 108 in users.py returns "User Not Found" but should properly use a HTTPException to exit the code
 - Added a HTTPException in get_following_users function with status.HTTP_404_NOT_FOUND for when a user does not exist
 6. get_friends function has 2 separate Queries to get Username and Friends, but could be combined into 1 Query
-7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise Error message.
+- While it is possible to combine these two queries, we have decided to leave them separate to enable error checking throughout the function. If we combined them and the query returned no result, we would not be able to tell if the result was empty because the user does not exist, or if it was empty because the user was not following anyone.
+7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise error message.
+- Added error checking to get_following function make it less ambiguous as to the reason for error
 8. This is a continuation of issue #7 as it returns a dictionary response when it should properly return an HTTPException to exit the code.
 9. lines 50-60 on lists.py are updating the status. However, if the updated status is the same as the previous status, it still returns the message "updated" even though no change occured.
 -   update_list_status function now checks to see if the new status is the same as the previous one
