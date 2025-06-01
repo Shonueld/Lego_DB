@@ -67,6 +67,7 @@ def follow_another_user(user_id: int, following: FollowUserRequest):
                 ),
             {"user_id": user_id}
         ).scalar_one_or_none()
+
         if not user_exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -83,11 +84,15 @@ def follow_another_user(user_id: int, following: FollowUserRequest):
                 ),
             {"following_id": following.following_id}
         ).scalar_one_or_none()
+
         if not target_exists:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"User with id {following.following_id} does not exist."
             )
+        
+        if user_id == following.following_id:
+            raise HTTPException(status_code=400, detail=f"Cannot follow yourself")
 
         # Check for duplicate follow
         already = connection.execute(
@@ -196,10 +201,13 @@ def get_following_users(user_id: int):
         
         following = [{"following_username": row.username} for row in result]
     
-
-    if username:
-        return {"user": username, "following": following}
-    return{"user not found"}
+    if not username:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    return{
+        "user": username,
+        "following": following
+    }
 
 @router.get("/{user_id}/activity/{following_id}", status_code=status.HTTP_200_OK)
 def get_user_activity_feed(user_id: int, following_id: int):

@@ -59,7 +59,9 @@ However, it immediately sorts the results queried into a dictionary meaning the 
 -   Replaced friends with followers, which intentionally use a one-way relationship
 Maybe implement a method of confirming friendship, or not counting as friends until it is mutual.
 4. Under add_friends in users.py, if inputting the same user id (Example: User 1 adding User 1 as a friend) it returns internal server error
+- Added error checking for when a user tries to follow itself
 5. line 108 in users.py returns "User Not Found" but should properly use a HTTPException to exit the code
+- Added a HTTPException in get_following_users function with status.HTTP_404_NOT_FOUND for when a user does not exist
 6. get_friends function has 2 separate Queries to get Username and Friends, but could be combined into 1 Query
 7. line 76 of users.py is using result.rowcount to determine if its an invalid id or duplicate which is ambiguous when testing. This could instead be separated to allow for a more precise Error message.
 8. This is a continuation of issue #7 as it returns a dictionary response when it should properly return an HTTPException to exit the code.
