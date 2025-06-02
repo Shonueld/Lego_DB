@@ -111,9 +111,9 @@ API Design Comments:
 - not a bad suggestion, could always just lable the table then do table_name.id
 
 1. For user_id and friend_id, the use of unique when creating the alembic table can be used to prevent duplicates.
-- could add that, pretty sure we already check for duplicates though
+- could add that, we already check for duplicates though
 2. On lists.py, the lists.status column accepts arbitrary strings. ENUM can be used so that only {"wishlist", "purchased", "building", "built"} are accepted.
-- great suggestion
+- Switched to using ENUM
 3. For reviews and list entries, an updated_at timestamp can make tracking entries easier.
 - already mentioned, good idea
 4. post_issue() returns both user_id and username, which can be redundant.
@@ -125,15 +125,15 @@ API Design Comments:
 7. A primary key id for the friends table can help with management and tracking.
 - primary key would be unecessary, it uses a composite key which can do the same thing
 8. For status and username, it should not be allowed to be NULL.
-- good idea
+- status was changed to only accept certain options, username minimum size is 1 character
 9. Username should have a character limit just so that the data is more consistent.
-- great idea
+- added username cap of 50 characters
 10. Users should only be able to leave one review per set, so a unique constraint should be implemented.
-- I believe users could review a set multiple times, however a limit could get added maybe 3-5. Or maybe limit to only 1 review and that review can get edited later
+- User could leave only 1 review, if it tries to resubmit a review it will override the old one
 11. For lists, users should also only be able to have one entry per set so a unique constraint should also be added.
 - previously mentioned
 12. CHECK constraints for reviews.rating can be implemented in the database columns even though it may be added in reviews.py
-- not sure what this means
+- Already test for duplicate entries
 1. API Endpoint /sets is very slow and returns too many results.
 Perhaps limit the return results.
 - Limited results to 50 by default and added an option to choose how many to return, now paginates results
@@ -157,6 +157,7 @@ Perhaps limit the return results
 10. I feel like Reviews should have a similar return message format as Issues.
 Currently it doesn't return username, created_at, or the id of the review itself which creating an Issue has in it's response message
 - Reviews currently returns a message (added/updated) set_id, user_id, rating, and description which I feel is sufficient
+- added review_id and created_at in the return type
 11. API Endpoint for /users/{user_id}/friends are duplicated. One is for POST and one is for GET.
 Rename them to distinguish them apart since this could potentially create conflicts.
 - This is standard RESTful and shouldn't be changed

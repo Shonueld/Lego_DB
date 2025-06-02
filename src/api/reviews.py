@@ -63,12 +63,13 @@ def add_review(set_id: int, review: ReviewRequest):
         ).scalar_one_or_none()
 
         if existing_review:
-            connection.execute(
+            review_id = connection.execute(
                 sqlalchemy.text(
                     """
                     UPDATE reviews
                     SET rating = :rating, description = :description, created_at = NOW()
                     WHERE user_id = :user_id AND set_id = :set_id
+                    RETURNING review_id
                     """
                 ),
                 {
@@ -77,14 +78,15 @@ def add_review(set_id: int, review: ReviewRequest):
                     "user_id": review.user_id,
                     "set_id": set_id
                 }
-            )
+            ).scalar_one()
             message = "Review successfully updated."
         else:
-            connection.execute(
+            review_id = connection.execute(
                 sqlalchemy.text(
                     """
                     INSERT INTO reviews (set_id, user_id, rating, description)
                     VALUES (:set_id, :user_id, :rating, :description)
+                    RETURNING review_id
                     """
                 ),
                 {
@@ -93,16 +95,29 @@ def add_review(set_id: int, review: ReviewRequest):
                     "rating": review.rating,
                     "description": review.description
                 }
-            )
+            ).scalar_one()
             message = "Review successfully added."
-    
+
+        created_at =  connection.execute(
+            sqlalchemy.text("""
+                SELECT created_at 
+                FROM reviews
+                WHERE review_id = :review_id
+                """),
+            {"review_id": review_id}
+        ).scalar_one()
+        
+
+    print("\n\n\nReview ID:", type(review_id), "\n\n\n")
     return ReviewMessageResponse(
         message=message,
         data=ReviewResponse(
+            review_id=review_id,
             set_id=set_id,
             user_id=review.user_id,
             rating=review.rating,
-            description=review.description)
+            description=review.description,
+            created_at=created_at)
     )
 
 @router.get("/{set_id}/reviews/average", response_model=AverageRatingResponse)
