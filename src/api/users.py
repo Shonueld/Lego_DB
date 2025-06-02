@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 class NewUser(BaseModel):
-    username: str = Field(..., min_length=1)
+    username: str = Field(..., min_length=1, max_length = 50)
 
 class UserId(BaseModel):
     user_id: int

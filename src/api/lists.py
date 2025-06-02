@@ -4,6 +4,7 @@ import sqlalchemy
 from src import database as db
 from src.api import auth
 from typing import List, Optional, Dict
+from enum import Enum
 
 router = APIRouter(
     prefix="/lists",
@@ -16,9 +17,6 @@ class ListStatusResponse(BaseModel):
     username: str
     set_id: int
     status: str
-
-class ListStatusUpdate(BaseModel):
-    status: str = Field(..., description="One of: wishlist, building, purchased, built")
 
 class FollowerActivityResponse(BaseModel):
     follower_username: str
@@ -40,16 +38,20 @@ class ListProgressResponse(BaseModel):
     message: str
     progress: Dict[str, ProgressStatus]
 
-VALID_STATUSES = {"wishlist", "purchased", "building", "built"}
+class ValidStatus(str, Enum):
+    wishlist = "wishlist"
+    building = "building"
+    purchased = "purchased"
+    built = "built"
+
+class ListStatusUpdate(BaseModel):
+    status: ValidStatus
 
 @router.put("/{user_id}/sets/{set_id}", response_model=ListStatusResponse, status_code=status.HTTP_200_OK)
 def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     """
     Updates or inserts a user's status for a specific LEGO set. Valid statuses are: wishlist, building, purchased, built.
     """
-
-    if body.status not in VALID_STATUSES:
-        raise HTTPException(status_code=400, detail="Invalid status.")
 
     with db.engine.begin() as conn:
         # 1. Get the username
