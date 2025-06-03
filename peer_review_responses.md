@@ -187,12 +187,13 @@ Rename them to distinguish them apart since this could potentially create confli
 
 Lucas Pierce Comments:
 1. What is the point of /users/{user_id}/friends/{friend_id}/activity? Why not just have a get activity endpoint for users?
-- 
+- The idea is that you could only see activity updates for the people you are following, similar to how twitters following tab works
 
 2. /sets/ with no query parameters doesn’t return. At the very least put a limit, but even better paginate the results.
 - Paginated the results so it works without paramaters
 
 3. /lists/{user_id}/sets/{set_id} gives internal server error when given some inputs.
+- Fixed with pagination
 
 
 Some funky code (like running a count(*) where username to look for a name already existing). The peer reviews did a good job of catching major issues. You got some great peer review feedback (and some not good advice ). Please address all of it or call out why you don’t think it should be addressed individually. Overall, one of the better projects, you did a great job. If you address feedback by June 2nd AND send me a message, I will give you points back

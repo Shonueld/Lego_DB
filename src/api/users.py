@@ -59,12 +59,12 @@ def create_user(new_user: NewUser):
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT COUNT(*) 
+                SELECT 1 
                 FROM users 
                 WHERE username = :username
                 """),
             {"username": new_user.username},
-        ).scalar_one_or_none()
+        ).scalar_one()
 
         if result > 0:
             raise HTTPException(status_code=400, detail="Username already exists")
@@ -282,41 +282,21 @@ def get_following_users(user_id: int):
     
     return FollowingListResponse(user=username, following=following)
 
-@router.get("/{user_id}/{following_id}/activity", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
-def get_user_activity_feed(user_id: int, following_id: int):
+@router.get("/{user_id}/activity", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
+def get_user_activity_feed(user_id: int):
     with db.engine.begin() as connection:
-        is_following = connection.execute(
-            sqlalchemy.text(
-                """
-                SELECT 1
-                FROM followers
-                WHERE user_id = :user_id AND following_id = :following_id
-                """
-            ),
-            {
-                "user_id": user_id,
-                "following_id": following_id
-            }
-        ).scalar_one_or_none()
-
-        if not is_following:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User {user_id} is not following user {following_id}."
-            )
-
         result = connection.execute(
             sqlalchemy.text(
                 """
                 SELECT s.id, s.name, l.status, l.created_at
                 FROM lists l
                 JOIN sets s ON s.id = l.set_id
-                WHERE l.user_id = :following_id
+                WHERE l.user_id = :user_id
                 ORDER BY l.created_at DESC
                 LIMIT 5
                 """
             ),
-            {"following_id": following_id}
+            {"user_id": user_id}
         ).fetchall()
         
         result_reviews = connection.execute(
@@ -325,29 +305,34 @@ def get_user_activity_feed(user_id: int, following_id: int):
                 SELECT s.id, s.name, r.rating, r.description, r.created_at
                 FROM reviews r
                 JOIN sets s ON s.id = r.set_id
-                WHERE r.user_id = :following_id
+                WHERE r.user_id = :user_id
                 ORDER BY r.created_at DESC
                 LIMIT 5
                 """
             ),
-            {"following_id": following_id}
+            {"user_id": user_id}
         ).fetchall()
 
-        following_username = connection.execute(
+        username = connection.execute(
             sqlalchemy.text(
                 """
                 SELECT username
                 FROM users
-                WHERE user_id = :following_id
+                WHERE user_id = :user_id
                 """
             ),
-            {"following_id": following_id}
+            {"user_id": user_id}
         ).scalar_one_or_none()
 
+    if not username:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {user_id} does not exist."
+        )
     if not result and not result_reviews:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No activity found for user '{following_username}'"
+            detail=f"No activity found for user '{username}'"
         )
 
     activity = [
@@ -372,12 +357,7 @@ def get_user_activity_feed(user_id: int, following_id: int):
     ]
 
     return UserActivityFeedResponse(
-        following_username=following_username,
+        following_username=username,
         activity=activity,
         reviews=reviews
     )
-
-
-
-
-
