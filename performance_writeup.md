@@ -37,3 +37,17 @@ Our service would scale this way because the majority of our database would be s
     - GET /sets/{set_id} 11ms
     
 # Performance tuning
+Explain results:
+
+
+What the explain means to us:
+
+
+Index we added to speed up the query:
+
+
+Improved explain results:
+
+
+    These results had the performance improvement we expected because it shortened the runtime from 183 ms to 138 ms.
+
