@@ -54,6 +54,11 @@ class UserActivityFeedResponse(BaseModel):
 
 @router.post("/", response_model=UserCreatedResponse, status_code=status.HTTP_201_CREATED)
 def create_user(new_user: NewUser):
+
+    username_clean = new_user.username.strip()
+    if not username_clean:
+        raise HTTPException(status_code=400, detail="Username cannot be empty or whitespace.")
+
     with db.engine.begin() as connection:
     
         result = connection.execute(
@@ -61,7 +66,7 @@ def create_user(new_user: NewUser):
                 """
                 SELECT 1 
                 FROM users 
-                WHERE username = :username
+                WHERE LOWER(username) = LOWER(:username)
                 """),
             {"username": new_user.username},
         ).scalar_one()
@@ -84,6 +89,10 @@ def create_user(new_user: NewUser):
 
 @router.post("/{user_id}/follow", response_model=FollowActionResponse, status_code=status.HTTP_201_CREATED)
 def follow_another_user(user_id: int, following: FollowUserRequest):
+
+    if user_id <= 0 or following.following_id <= 0:
+        raise HTTPException(status_code=400, detail="User IDs must be positive integers.")
+
     with db.engine.begin() as connection:
         # Verify both users exist
         user_exists = connection.execute(
