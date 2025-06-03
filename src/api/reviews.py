@@ -47,12 +47,24 @@ def add_review(set_id: int, review: ReviewRequest):
     """
     Add a review for a specific Lego set.
     """
+
+    if review.user_id <= 0:
+        raise HTTPException(status_code=400, detail="User ID must be a positive integer.")
+
     if review.rating < 1 or review.rating > 5:
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
     
-    # Check if the has built set
     with db.engine.begin() as connection:
         validate_set_exists(connection, set_id)
+
+        user_exists = connection.execute(
+            sqlalchemy.text("SELECT 1 FROM users WHERE user_id = :user_id"),
+            {"user_id": review.user_id}
+        ).scalar_one_or_none()
+
+        if not user_exists:
+            raise HTTPException(status_code=404, detail="User ID does not exist.")
+
         built_check = connection.execute(
             sqlalchemy.text(
                 """
@@ -136,6 +148,7 @@ def get_average_rating(set_id: int):
     """
     Get the average rating for a set.
     """
+
     with db.engine.begin() as connection:
         validate_set_exists(connection, set_id)
         result = connection.execute(
@@ -162,6 +175,7 @@ def get_all_reviews(
     """
     Retrieve all reviews for a specific set, sorted by date or score.
     """
+
     sort_clause = {
         "newest": "created_at DESC",
         "oldest": "created_at ASC",

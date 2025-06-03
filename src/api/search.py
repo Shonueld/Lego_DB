@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from typing import Optional, List
 import sqlalchemy
 from src import database as db
@@ -37,6 +37,22 @@ def search_sets(
     Search for LEGO sets using optional filters like piece count, year, and theme.
     Supports pagination using limit and offset.
     """
+
+    if min_pieces is not None and max_pieces is not None and min_pieces > max_pieces:
+        raise HTTPException(status_code=400, detail="min_pieces cannot be greater than max_pieces.")
+
+    if min_year is not None and max_year is not None and min_year > max_year:
+        raise HTTPException(status_code=400, detail="min_year cannot be greater than max_year.")
+
+    for val, label in [
+        (min_pieces, "min_pieces"),
+        (max_pieces, "max_pieces"),
+        (min_year, "min_year"),
+        (max_year, "max_year"),
+    ]:
+        if val is not None and val <= 0:
+            raise HTTPException(status_code=400, detail=f"{label} must be a positive integer.")
+
     query = """
         SELECT id, set_number, name, year_released, number_of_parts, theme_name
         FROM sets
