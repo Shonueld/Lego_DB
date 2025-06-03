@@ -16,7 +16,7 @@ def generate_list_entries():
 
         for _ in range(TOTAL):
             user_id = random.randint(1, 50000)
-            set_id = random.randint(1, 25000)
+            set_id = random.randint(1, 20596)
             status = random.choice(statuses)
             created_at = fake.date_time_between(start_date='-2y', end_date='now').isoformat()
             writer.writerow([user_id, set_id, status, created_at])

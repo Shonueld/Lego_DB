@@ -15,7 +15,7 @@ def generate_reviews():
 
         for _ in range(TOTAL):
             user_id = random.randint(1, 50000)
-            set_id = random.randint(1, 25000)
+            set_id = random.randint(1, 20596)
             rating = random.randint(1, 5)
             description = fake.sentence(nb_words=8)
             created_at = fake.date_time_between(start_date='-2y', end_date='now').isoformat()

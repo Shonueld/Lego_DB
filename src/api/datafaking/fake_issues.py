@@ -15,7 +15,7 @@ def generate_issues():
 
         for _ in range(TOTAL):
             user_id = random.randint(1, 50000)
-            set_id = random.randint(1, 25000)
+            set_id = random.randint(1, 20596)
             description = fake.sentence(nb_words=10)
             created_at = fake.date_time_between(start_date='-2y', end_date='now').isoformat()
             writer.writerow([set_id, user_id, description, created_at])
