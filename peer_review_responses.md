@@ -35,15 +35,32 @@ Code Review Comments:
 3. On @router.post("/{user_id}/friends", status_code=status.HTTP_201_CREATED), where it returns {"message": "Invalid ids or attempting to enter duplicates"}, it could be more clear as to whether it is because of invalid ids or attempting to enter duplicates.
 - Added two error messages: one to indicate if a user is already following another user, and another if the user being followed does not exist.
 
-4. user_id is fetched multiple times, a abstract helper function can help reduce repetition
+4. user_id is fetched multiple times, an abstract helper function can help reduce repetition
+- Helper function not necessary. endpoints work as intended. 
+
 5. In sets.py and other files where a dictionary is being returned, response models can be used for clarity.
+- Response models are clear already. If endpoint is successful or fails then response is clear enough to help debug problem. 
+
 6. Friends for now stores a one directional friendship, a bidirectional design may make more sense. If you wanted to keep it one directional, perhaps a follower and following may make more sense.
+- Friends endpoints removed and follow, unfollow, following activity endpoints have been added as well as new tables to show followers.
+
 7. Validation to check if foreign keys exist should be implemented before attempting inserts, like seeing if set_id in /sets/{set_id}/reviews actually exists.
+- Check has been added to see if set_id exist before insert.
+
 8. For sets, id is referred to as sets.id, while for users, id is called user_id. Standardizing this for primary keys across the tables can make it less error prone.
+- Not a big issue. Works as intended.
+
 9. Some files import Enum and Optional without ever using them.
+- Does not cause any errors if imports stay in files.
+
 10. In reviews.py, the sort_clause is hardcoded into the get_all_reviews function. sort_clause can be its own function so that it can also be called in users.py when getting friend’s reviews.
+- sort_clause is not used much so function is unnecessary.
+
 11. Something should be implemented to prevent a user from putting multiple reviews on a set.
+- Multiple reviews cannot be inserted for one set. When writing another review for the same set this will just update your old review. 
+
 12. When dict(row._mapping) is used on return statements; there should be a response model so that it is consistent throughout the other files that also return a dictionary.
+-  Response model was being used before with dict(row._mapping). dict(row._mapping) has been removed with code that is more readable.
 
 
 1. Under the endpoint users/{user_id}/friends/{friend_id}/activity

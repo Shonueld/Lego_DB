@@ -32,6 +32,16 @@ class AverageRatingResponse(BaseModel):
     set_id: int
     average_rating: float
 
+def validate_set_exists(connection, set_id: int):
+    set_exists = connection.execute(
+        sqlalchemy.text("SELECT 1 FROM sets WHERE id = :set_id"),
+        {"set_id": set_id}
+    ).scalar_one_or_none()
+
+    if not set_exists:
+        raise HTTPException(status_code=404, detail="Set ID does not exist.")
+
+
 @router.post("/{set_id}/reviews", response_model=ReviewMessageResponse, status_code=status.HTTP_201_CREATED)
 def add_review(set_id: int, review: ReviewRequest):
     """
@@ -42,6 +52,7 @@ def add_review(set_id: int, review: ReviewRequest):
     
     # Check if the has built set
     with db.engine.begin() as connection:
+        validate_set_exists(connection, set_id)
         built_check = connection.execute(
             sqlalchemy.text(
                 """
@@ -126,6 +137,7 @@ def get_average_rating(set_id: int):
     Get the average rating for a set.
     """
     with db.engine.begin() as connection:
+        validate_set_exists(connection, set_id)
         result = connection.execute(
             sqlalchemy.text(
                 """
@@ -165,9 +177,23 @@ def get_all_reviews(
     """
 
     with db.engine.begin() as connection:
+        validate_set_exists(connection, set_id)
         result = connection.execute(
             sqlalchemy.text(query),
             {"set_id": set_id}
         ).fetchall()
 
-    return [ReviewResponse(**dict(row._mapping)) for row in result]
+    return [
+    ReviewResponse(
+        review_id=row.review_id,
+        set_id=row.set_id,
+        user_id=row.user_id,
+        rating=row.rating,
+        description=row.description,
+        created_at=row.created_at
+    )
+    for row in result
+]
+
+
+    #return [ReviewResponse(**dict(row._mapping)) for row in result]
