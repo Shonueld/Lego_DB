@@ -27,5 +27,13 @@ Our service would scale this way because the majority of our database would be s
     - POST /users/{user_id}/follow 22ms
     - POST /users/{user_id}/unfollow 12ms
     - GET /users/{user_id}/following-list 24ms
+    - GET /users/{user_id}/activity/{following_id} 33ms
+    - POST /sets/{set_id}/reviews 26ms
+    - GET /sets/{set_id}/reviews 23ms
+    - GET /sets/{set_id}/reviews/average 20ms
+    - POST /sets/{set_id}/issues 33ms
+    - GET /sets/{set_id}/issues 44ms
+    - GET /sets 23ms
+    - GET /sets/{set_id} 11ms
     
 # Performance tuning
