@@ -13,6 +13,7 @@ Final rows of data in each table:
 - Issues: 100,000 rows
 - Followers: 200,000 rows
 - Follow Log: 200,000 rows
+- Total rows of data: 1,171,496
 
 Justification:
 Our service would scale this way because the majority of our database would be storing users lists, as almost every user who cares enough to make an account to keep track of their lists is going to add a few sets. Each user we estimated follows around 4 others, which seems like a reasonable amount of friends who build legos the average lego enjoyer has, and 2 in every five sets added to a list are either reviewed or have an issue associated.
@@ -49,5 +50,5 @@ Index we added to speed up the query:
 Improved explain results:
 
 
-    These results had the performance improvement we expected because it shortened the runtime from 183 ms to 138 ms.
+    These results had the performance improvement we expected because they shortened the runtime from 183 ms to 138 ms.
 
