@@ -178,6 +178,10 @@ def follow_another_user(user_id: int, following: FollowUserRequest):
 
 @router.post("/{user_id}/unfollow", response_model=FollowActionResponse, status_code=status.HTTP_200_OK)
 def unfollow_user(user_id: int, following: FollowUserRequest):
+
+    if user_id <= 0 or following.following_id <= 0:
+        raise HTTPException(status_code=400, detail="User IDs must be positive integers.")
+
     with db.engine.begin() as connection:
         user_exists = connection.execute(
             sqlalchemy.text(
@@ -262,6 +266,10 @@ def unfollow_user(user_id: int, following: FollowUserRequest):
 
 @router.get("/{user_id}/following-list", response_model=FollowingListResponse, status_code=status.HTTP_200_OK)
 def get_following_users(user_id: int):
+
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail="User IDs must be positive integers.")
+
     with db.engine.begin() as connection:
         username = connection.execute(
             sqlalchemy.text(
@@ -293,6 +301,10 @@ def get_following_users(user_id: int):
 
 @router.get("/{user_id}/activity", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
 def get_user_activity_feed(user_id: int):
+
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail="User IDs must be positive integers.")
+
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
