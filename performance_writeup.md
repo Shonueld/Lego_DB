@@ -19,6 +19,13 @@ Our service would scale this way because the majority of our database would be s
 
 # Performance results of hitting endpoints
 
-    - add_users:  ms
-
+    - GET /popular-sets 26 ms
+    - GET /build-streaks 183 ms
+    - PUT /lists/{user_id}/sets/{set_id} 35ms
+    - GET /lists/{user_id}/progress 44ms
+    - POST /users 6ms
+    - POST /users/{user_id}/follow 22ms
+    - POST /users/{user_id}/unfollow 12ms
+    - GET /users/{user_id}/following-list 24ms
+    
 # Performance tuning

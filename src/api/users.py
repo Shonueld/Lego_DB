@@ -355,7 +355,7 @@ def get_user_activity_feed(user_id: int, following_id: int):
             "set_id": row.id,
             "set_name": row.name,
             "status": row.status,
-            "created_at": row.created_at
+            "created_at": row.created_at.isoformat() if row.created_at is not None else None
         }
         for row in result
     ]
@@ -366,7 +366,7 @@ def get_user_activity_feed(user_id: int, following_id: int):
             "set_name": row.name,
             "rating": row.rating,
             "description": row.description,
-            "created_at": row.created_at
+            "created_at": row.created_at.isoformat() if row.created_at is not None else None
         }
         for row in result_reviews
     ]
