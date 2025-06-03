@@ -187,6 +187,7 @@ Rename them to distinguish them apart since this could potentially create confli
 
 Lucas Pierce Comments:
 1. What is the point of /users/{user_id}/friends/{friend_id}/activity? Why not just have a get activity endpoint for users?
+- 
 
 2. /sets/ with no query parameters doesn’t return. At the very least put a limit, but even better paginate the results.
 - Paginated the results so it works without paramaters

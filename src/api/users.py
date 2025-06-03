@@ -282,7 +282,7 @@ def get_following_users(user_id: int):
     
     return FollowingListResponse(user=username, following=following)
 
-@router.get("/{user_id}/activity/{following_id}", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
+@router.get("/{user_id}/{following_id}/activity", response_model=UserActivityFeedResponse, status_code=status.HTTP_200_OK)
 def get_user_activity_feed(user_id: int, following_id: int):
     with db.engine.begin() as connection:
         is_following = connection.execute(
