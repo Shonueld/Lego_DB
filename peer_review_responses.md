@@ -193,7 +193,7 @@ Lucas Pierce Comments:
 - Paginated the results so it works without paramaters
 
 3. /lists/{user_id}/sets/{set_id} gives internal server error when given some inputs.
-- Fixed with pagination
+- Now the endpoint has error checking for invalid user_id, set_id, or status. This protects against user_id and set_id values that don't exist, as well as status values that aren't one of the valid pre-set values.
 
 
 Some funky code (like running a count(*) where username to look for a name already existing). The peer reviews did a good job of catching major issues. You got some great peer review feedback (and some not good advice ). Please address all of it or call out why you don’t think it should be addressed individually. Overall, one of the better projects, you did a great job. If you address feedback by June 2nd AND send me a message, I will give you points back
