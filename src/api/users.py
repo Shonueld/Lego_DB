@@ -59,7 +59,7 @@ def create_user(new_user: NewUser):
         result = connection.execute(
             sqlalchemy.text(
                 """
-                SELECT 1 
+                SELECT COUNT(*) 
                 FROM users 
                 WHERE username = :username
                 """),
