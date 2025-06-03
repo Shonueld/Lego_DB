@@ -38,20 +38,6 @@ Our service would scale this way because the majority of our database would be s
     - GET /sets/{set_id} 11ms
 
 # Performance tuning
-Explain results:
-
-
-What the explain means to us:
-
-
-Index we added to speed up the query:
-
-
-Improved explain results:
-
-
-    These results had the performance improvement we expected because they shortened the runtime from 183 ms to 138 ms.
-
 
 Explain before adding index:
 
@@ -102,3 +88,5 @@ Limit  (cost=16685.60..16685.63 rows=10 width=23)
 "                                                        Index Cond: (status = 'built'::text)"
                     ->  Hash  (cost=837.00..837.00 rows=50000 width=15)
                           ->  Seq Scan on users u  (cost=0.00..837.00 rows=50000 width=15)
+
+These results had the performance improvement we expected because they shortened the runtime from 183 ms to 138 ms.
