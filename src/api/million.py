@@ -54,11 +54,7 @@ def generate_username_set(count):
             usernames.add(username)
 
     return list(usernames)
-
-
-
-@router.post("/users/{count}", response_model=FollowActionResponse, status_code=status.HTTP_200_OK)
-def postnewUsers(count: int):
+def add_new_users(count: int) -> int:
     if count < 1:
         raise HTTPException(status_code=400, detail="Count must be greater than 0")
 
@@ -82,6 +78,13 @@ def postnewUsers(count: int):
 
             result = connection.execute(sql, param_dict).fetchall()
             num_added += len(result)  # Approximate count; won't include skipped duplicates
+    return num_added
+
+
+
+@router.post("/users/{count}", response_model=FollowActionResponse, status_code=status.HTTP_200_OK)
+def add_users(count: int) -> FollowActionResponse:
+    num_added = add_new_users(count)
     return FollowActionResponse(message=f"{num_added} users were created")
 
 
