@@ -61,7 +61,7 @@ Limit  (cost=31581.48..31581.51 rows=10 width=23)
                     ->  Hash  (cost=837.00..837.00 rows=50000 width=15)
                           ->  Seq Scan on users u  (cost=0.00..837.00 rows=50000 width=15)
 
-The biggest problem we can see from this explain is the Seq Scan on lists. This means its scanning every single row in the list where status = 'built'. 
+The biggest problem we can see from this explain is the Seq Scan on lists. This means its scanning every single row in the list to find where status = 'built'. 
 
 Index added:
 
