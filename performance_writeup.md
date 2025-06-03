@@ -23,7 +23,7 @@ Our service would scale this way because the majority of our database would be s
     - GET /popular-sets 26 ms
     - GET /build-streaks 183 ms (SLOWEST) -> 130ms
     - PUT /lists/{user_id}/sets/{set_id} 35ms
-    - GET /lists/{user_id}/progress 44ms
+    - GET /lists/{user_id}/progress 44ms (2nd SLOWEST tie)
     - POST /users 6ms
     - POST /users/{user_id}/follow 22ms
     - POST /users/{user_id}/unfollow 12ms
@@ -33,7 +33,7 @@ Our service would scale this way because the majority of our database would be s
     - GET /sets/{set_id}/reviews 23ms
     - GET /sets/{set_id}/reviews/average 20ms
     - POST /sets/{set_id}/issues 33ms
-    - GET /sets/{set_id}/issues 44ms
+    - GET /sets/{set_id}/issues 44ms (2nd SLOWEST tie)
     - GET /sets 23ms
     - GET /sets/{set_id} 11ms
 
