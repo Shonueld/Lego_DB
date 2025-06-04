@@ -34,6 +34,12 @@ def post_issue(set_id: int, issue: IssueRequest):
     """
     Adds an issue for a specific Lego set.
     """
+
+    if set_id <= 0:
+        raise HTTPException(status_code=400, detail="Set ID must be a positive integer.")
+    if issue.user_id <= 0:
+        raise HTTPException(status_code=400, detail="User ID must be a positive integer.")
+    
     with db.engine.begin() as connection:
         # Lookup username for user_id
         user_row = connection.execute(
@@ -92,6 +98,10 @@ def get_issues_for_set(set_id: int, limit: int = Query(50, ge=1), offset: int = 
     """
     Retrieve all issues reported for a specific set.
     """
+
+    if set_id <= 0:
+        raise HTTPException(status_code=400, detail="Set ID must be a positive integer.")
+
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
