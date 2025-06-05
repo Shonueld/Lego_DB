@@ -69,9 +69,9 @@ def create_user(new_user: NewUser):
                 WHERE LOWER(username) = LOWER(:username)
                 """),
             {"username": new_user.username},
-        ).scalar_one()
+        ).scalar_one_or_none()
 
-        if result > 0:
+        if result is not None:
             raise HTTPException(status_code=400, detail="Username already exists")
 
         user_id = connection.execute(
