@@ -48,6 +48,12 @@ def update_list_status(user_id: int, set_id: int, body: ListStatusUpdate):
     Updates or inserts a user's status for a specific LEGO set. Valid statuses are: wishlist, building, purchased, built.
     """
 
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail="User ID must be a positive integer.")
+    
+    if set_id <= 0:
+        raise HTTPException(status_code=400, detail="Set ID must be a positive integer.")
+
     if body.status not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail="Invalid status.")
 
@@ -145,6 +151,9 @@ def get_list_progress(user_id: int):
     """
     Displays a user's progress for their entire list.
     """
+
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail="User ID must be a positive integer.")
 
     with db.engine.begin() as conn:
         # 1. Get the username from the user_id

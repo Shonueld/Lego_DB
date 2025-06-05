@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
@@ -26,6 +26,11 @@ class StreakUser(BaseModel):
 # Most popular sets built in a given month and year
 @router.get("/popular-sets", response_model=List[PopularSet])
 def get_most_popular_sets(month: int = Query(..., ge=1, le=12), year: int = Query(...)):
+    
+    current_year = datetime.now().year
+    if year <= 0 or year > current_year:
+        raise HTTPException(status_code=400, detail="Year must be a positive integer and not in the future.")
+
     with db.engine.begin() as conn:
         result = conn.execute(
             sqlalchemy.text("""
@@ -44,6 +49,7 @@ def get_most_popular_sets(month: int = Query(..., ge=1, le=12), year: int = Quer
         sets = result.fetchall()
     
     return [PopularSet(**dict(row._mapping)) for row in sets]
+
 # Get users with the longest build streaks (at least one built status per week)
 @router.get("/build-streaks", response_model=List[StreakUser])
 def get_top_build_streaks():

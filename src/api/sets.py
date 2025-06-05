@@ -34,6 +34,10 @@ def get_set(set_id: int):
     """
     Retrieves details for a specific set by ID
     """
+
+    if set_id <= 0:
+        raise HTTPException(status_code=400, detail="Set ID must be a positive integer.")
+
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
