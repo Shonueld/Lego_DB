@@ -16,8 +16,8 @@ Lego DB is a centralized database platform for Lego enthusiasts to manage their 
 - Designed to handle thousands of unique Lego sets while maintaining data integrity between user profiles and the global catalog.
 
 # Developers
-Sean Griffin (sgriff30@calpoly.edu)
-Thomas Hagos (thagos@calpoly.edu)
-Javier Medina Bueno (medinabu@calpoly.edu)
-Yenny Ma (yyma@calpoly.edu)
+- Sean Griffin (sgriff30@calpoly.edu)
+- Thomas Hagos (thagos@calpoly.edu)
+- Javier Medina Bueno (medinabu@calpoly.edu)
+- Yenny Ma (yyma@calpoly.edu)
 
